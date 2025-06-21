@@ -13,7 +13,7 @@ class TvConfigController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['show', 'showMobile', 'getConfig', 'getActiveMultimedia']);
     }
 
     /**
@@ -86,6 +86,15 @@ class TvConfigController extends Controller
     {
         $tvConfig = TvConfig::getCurrentConfig();
         return view('tv.display', compact('tvConfig'));
+    }
+
+    /**
+     * Mostrar la página móvil con configuración del TV
+     */
+    public function showMobile()
+    {
+        $tvConfig = TvConfig::getCurrentConfig();
+        return view('mobile.display', compact('tvConfig'));
     }
 
     /**

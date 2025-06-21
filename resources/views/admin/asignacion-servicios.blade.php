@@ -68,8 +68,8 @@
                 <!-- Contenedor de servicios (solo se muestra cuando hay un usuario seleccionado) -->
                 <div x-show="selectedUserId && !loading" x-transition class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Servicios Disponibles -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                    <div class="bg-white shadow-sm border border-gray-200">
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
                             <h3 class="text-lg font-semibold text-gray-900">Servicios Disponibles</h3>
                             <p class="text-sm text-gray-600 mt-1">Servicios que pueden ser asignados al usuario</p>
                         </div>
@@ -82,7 +82,7 @@
                             </div>
                             <div class="space-y-2">
                                 <template x-for="servicio in serviciosDisponibles" :key="servicio.id">
-                                    <div class="service-item p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-hospital-blue hover:bg-blue-50"
+                                    <div class="service-item p-3 border border-gray-200 cursor-pointer hover:border-hospital-blue hover:bg-blue-50"
                                          @click="asignarServicio(servicio.id)">
                                         <div class="flex items-center justify-between">
                                             <div class="flex-1">
@@ -109,8 +109,8 @@
                     </div>
 
                     <!-- Servicios Asignados -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-4 border-b border-gray-200 bg-hospital-blue text-white rounded-t-lg">
+                    <div class="bg-white shadow-sm border border-gray-200">
+                        <div class="p-4 border-b border-gray-200 bg-hospital-blue text-white">
                             <h3 class="text-lg font-semibold">Servicios Asignados</h3>
                             <p class="text-sm opacity-90 mt-1">Servicios actualmente asignados al usuario</p>
                         </div>
@@ -123,7 +123,7 @@
                             </div>
                             <div class="space-y-2">
                                 <template x-for="servicio in serviciosAsignados" :key="servicio.id">
-                                    <div class="service-item p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-red-400 hover:bg-red-50"
+                                    <div class="service-item p-3 border border-gray-200 cursor-pointer hover:border-red-400 hover:bg-red-50"
                                          @click="desasignarServicio(servicio.id)">
                                         <div class="flex items-center justify-between">
                                             <div class="flex-1">

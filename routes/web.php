@@ -85,6 +85,9 @@ Route::post('/turnos/seleccionar', [TurnoController::class, 'seleccionarServicio
 // Ruta para el televisor - visualizador de turnos
 Route::get('/tv', [TvConfigController::class, 'show'])->name('tv.display');
 
+// Ruta para la visualización móvil
+Route::get('/movil', [TvConfigController::class, 'showMobile'])->name('mobile.display');
+
 // API para obtener configuración del TV
 Route::get('/api/tv-config', [TvConfigController::class, 'getConfig'])->name('api.tv-config');
 

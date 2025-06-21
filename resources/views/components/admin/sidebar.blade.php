@@ -4,7 +4,7 @@
 @endphp
 
 <!-- Sidebar -->
-<aside class="w-72 bg-hospital-blue text-white shadow-xl flex flex-col min-h-screen fixed md:relative inset-y-0 left-0 z-30 transform md:transform-none transition-transform duration-300 ease-in-out"
+<aside class="w-72 bg-hospital-blue text-white shadow-xl flex flex-col h-screen fixed md:relative inset-y-0 left-0 z-30 transform md:transform-none transition-transform duration-300 ease-in-out"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
 
     <!-- Header del Sidebar -->
@@ -45,8 +45,8 @@
     </div>
 
     <!-- Navegación -->
-    <div class="flex-1 p-4 sidebar-nav pb-20">
-        <nav class="space-y-1">
+    <div class="flex-1 overflow-y-auto sidebar-nav">
+        <nav class="space-y-1 p-4 pb-20">
             <!-- Inicio -->
             <a href="{{ route('admin.dashboard') }}" class="sidebar-item group w-full flex items-center justify-start {{ $currentRoute === 'admin.dashboard' ? 'bg-white/20 text-white border-l-4 border-white shadow-md relative' : 'text-blue-200 hover:text-white hover:bg-white/10' }} p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
                 <svg class="mr-3 h-5 w-5 {{ $currentRoute === 'admin.dashboard' ? '' : 'group-hover:text-white transition-colors' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">

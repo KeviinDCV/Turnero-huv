@@ -54,7 +54,9 @@
         }
 
         .modal-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(100, 116, 139, 0.25) !important;
+            backdrop-filter: blur(2px) !important;
+            -webkit-backdrop-filter: blur(2px) !important;
         }
 
         /* Responsive sidebar */
@@ -155,7 +157,7 @@
                     <!-- Header -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <h1 class="text-xl md:text-2xl font-bold text-gray-800">Configuración del TV</h1>
-                        <a href="{{ route('tv.display') }}" target="_blank" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer w-full sm:w-auto flex items-center justify-center">
+                        <a href="{{ route('tv.display') }}" target="_blank" class="bg-hospital-blue text-white px-4 py-2 rounded cursor-pointer w-full sm:w-auto flex items-center justify-center focus:outline-none">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                             </svg>
@@ -238,14 +240,14 @@
                             <button
                                 type="button"
                                 onclick="resetForm()"
-                                class="px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors"
+                                class="px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 focus:outline-none"
                             >
                                 Restablecer
                             </button>
                             <button
                                 type="submit"
                                 id="submitBtn"
-                                class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="bg-hospital-blue text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
                             >
                                 <span id="submitText">Guardar Configuración</span>
                                 <span id="loadingText" class="hidden">Guardando...</span>
@@ -259,7 +261,7 @@
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-lg font-semibold text-gray-800">Gestión de Multimedia</h2>
                             @if($multimedia->count() > 0)
-                            <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer flex items-center">
+                            <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded cursor-pointer flex items-center focus:outline-none">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -309,13 +311,13 @@
                                         <div class="flex items-center space-x-2">
                                             <!-- Toggle activo -->
                                             <button onclick="toggleActive({{ $item->id }})"
-                                                    class="px-3 py-1 rounded text-xs font-medium transition-colors {{ $item->activo ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200' }}">
+                                                    class="px-3 py-1 rounded text-xs font-medium {{ $item->activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }} focus:outline-none">
                                                 {{ $item->activo ? 'Activo' : 'Inactivo' }}
                                             </button>
 
                                             <!-- Eliminar -->
                                             <button onclick="confirmDelete({{ $item->id }}, '{{ addslashes($item->nombre) }}')"
-                                                    class="px-3 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition-colors">
+                                                    class="px-3 py-1 bg-red-100 text-red-800 rounded text-xs font-medium focus:outline-none">
                                                 Eliminar
                                             </button>
                                         </div>
@@ -329,7 +331,7 @@
                                     <h3 class="mt-2 text-sm font-medium text-gray-900">No hay archivos multimedia</h3>
                                     <p class="mt-1 text-sm text-gray-500">Comience subiendo imágenes o videos para mostrar en el TV.</p>
                                     <div class="mt-6">
-                                        <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer flex items-center mx-auto">
+                                        <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded cursor-pointer flex items-center mx-auto focus:outline-none">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                             </svg>
@@ -345,7 +347,7 @@
 
 @section('scripts')
     <!-- Modal de éxito -->
-    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div id="successModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
@@ -361,7 +363,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <button onclick="closeSuccessModal()" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer">
+                    <button onclick="closeSuccessModal()" class="bg-hospital-blue text-white px-4 py-2 rounded cursor-pointer focus:outline-none">
                         Aceptar
                     </button>
                 </div>
@@ -1129,10 +1131,10 @@
                 </form>
 
                 <div class="mt-6 flex justify-center space-x-3">
-                    <button onclick="closeUploadModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors">
+                    <button onclick="closeUploadModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none transition-colors">
                         Cancelar
                     </button>
-                    <button onclick="uploadFile()" id="uploadBtn" class="px-4 py-2 bg-hospital-blue text-white rounded-md text-sm font-medium hover:bg-hospital-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors">
+                    <button onclick="uploadFile()" id="uploadBtn" class="px-4 py-2 bg-hospital-blue text-white rounded-md text-sm font-medium focus:outline-none">
                         <span id="uploadBtnText">Subir Archivo</span>
                         <span id="uploadBtnLoading" class="hidden">Subiendo...</span>
                     </button>
@@ -1159,10 +1161,10 @@
                 </div>
 
                 <div class="mt-6 flex justify-center space-x-4">
-                    <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors cursor-pointer">
+                    <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors cursor-pointer focus:outline-none">
                         Cancelar
                     </button>
-                    <button onclick="deleteFile()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer">
+                    <button onclick="deleteFile()" class="px-4 py-2 bg-red-600 text-white rounded cursor-pointer focus:outline-none">
                         Eliminar
                     </button>
                 </div>
@@ -1187,7 +1189,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <button onclick="closeDeleteSuccessModal()" class="px-4 py-2 bg-hospital-blue text-white rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer">
+                    <button onclick="closeDeleteSuccessModal()" class="px-4 py-2 bg-hospital-blue text-white rounded cursor-pointer focus:outline-none">
                         Aceptar
                     </button>
                 </div>
@@ -1212,7 +1214,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <button onclick="closeDeleteErrorModal()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer">
+                    <button onclick="closeDeleteErrorModal()" class="px-4 py-2 bg-red-600 text-white rounded cursor-pointer focus:outline-none">
                         Aceptar
                     </button>
                 </div>
@@ -1237,7 +1239,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <button onclick="closeFileErrorModal()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer">
+                    <button onclick="closeFileErrorModal()" class="px-4 py-2 bg-red-600 text-white rounded cursor-pointer focus:outline-none">
                         Aceptar
                     </button>
                 </div>
