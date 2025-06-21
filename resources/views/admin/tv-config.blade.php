@@ -1,40 +1,72 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración TV - Turnero HUV</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+@extends('layouts.admin')
+
+@section('title', 'Configuración TV')
+
+@section('styles')
     <style>
-        .bg-hospital-blue {
-            background-color: #064b9e;
+        :root {
+            --hospital-blue: #064b9e;
+            --hospital-blue-hover: #053d7a;
+            --hospital-blue-light: #e6f0ff;
         }
 
-        .bg-hospital-blue-hover:hover {
-            background-color: #053a7a;
+        .bg-hospital-blue {
+            background-color: var(--hospital-blue);
         }
 
         .text-hospital-blue {
-            color: #064b9e;
+            color: var(--hospital-blue);
         }
 
         .border-hospital-blue {
-            border-color: #064b9e;
+            border-color: var(--hospital-blue);
         }
 
-        [x-cloak] {
-            display: none !important;
+        .hover\:bg-hospital-blue-hover:hover {
+            background-color: var(--hospital-blue-hover);
         }
 
-        /* Estilo para modal overlay - igual que en users.blade.php */
+        .bg-hospital-blue-light {
+            background-color: var(--hospital-blue-light);
+        }
+
+        /* Animaciones suaves */
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+
+        /* Mejora del scroll en la sidebar */
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
         .modal-overlay {
-            background-color: rgba(100, 116, 139, 0.25) !important;
-            backdrop-filter: blur(2px) !important;
-            -webkit-backdrop-filter: blur(2px) !important;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Responsive sidebar */
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
         }
 
         /* Estilos adicionales para la sidebar */
@@ -64,18 +96,12 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Estilos para el formulario */
-        .form-input {
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(6, 75, 158, 0.15);
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
         }
 
         /* Estilos para tabs */
@@ -101,149 +127,35 @@
 
         .sortable-item {
             cursor: move;
+            transition: all 0.2s ease;
         }
 
         .sortable-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+
+        .sortable-item[draggable="true"]:hover .drag-handle {
+            color: var(--hospital-blue);
+        }
+
+        .sortable-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
-</head>
-<body class="min-h-screen bg-gray-100" x-data="{ sidebarOpen: false }">
-    <!-- Header -->
-    <header class="bg-hospital-blue text-white px-6 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <!-- Botón hamburguesa para móviles -->
-            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-white hover:bg-hospital-blue-hover p-2 rounded">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            <div class="text-2xl font-bold">
-                Turnero<span class="text-gray-300">HUV</span>
-            </div>
-        </div>
-        <div class="flex items-center space-x-4">
-            <span class="text-sm">Bienvenido, <span class="font-semibold">{{ $user->nombre_completo }}</span></span>
-            <form method="POST" action="{{ route('logout') }}" class="inline">
-                @csrf
-                <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-medium transition-colors">
-                    Cerrar Sesión
-                </button>
-            </form>
-        </div>
-    </header>
+@endsection
 
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside class="bg-hospital-blue text-white w-64 min-h-screen p-4 fixed md:relative z-30 transform transition-transform duration-300 ease-in-out"
-               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
-            
-            <!-- Overlay para móviles -->
-            <div x-show="sidebarOpen" @click="sidebarOpen = false" 
-                 class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-                 x-transition:enter="transition-opacity ease-linear duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition-opacity ease-linear duration-300"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"></div>
-
-            <div class="space-y-2 relative z-30">
-                <!-- Dashboard -->
-                <a href="{{ route('admin.dashboard') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Dashboard</span>
-                </a>
-
-                <!-- Separador -->
-                <div class="py-2">
-                    <div class="border-t border-white/20"></div>
-                    <p class="text-xs text-blue-200 mt-2 px-3 font-medium uppercase tracking-wider">Gestión</p>
-                </div>
-
-                <!-- Usuarios -->
-                <a href="{{ route('admin.users') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Usuarios</span>
-                </a>
-
-                <!-- Cajas -->
-                <a href="{{ route('admin.cajas') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Cajas</span>
-                </a>
-
-                <!-- Servicios -->
-                <a href="{{ route('admin.servicios') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Servicios</span>
-                </a>
-
-                <!-- Asignación de Servicios -->
-                <a href="{{ route('admin.asignacion-servicios') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Asignación Servicios</span>
-                </a>
-
-                <!-- Separador -->
-                <div class="py-2">
-                    <div class="border-t border-white/20"></div>
-                    <p class="text-xs text-blue-200 mt-2 px-3 font-medium uppercase tracking-wider">Sistema</p>
-                </div>
-
-                <!-- Reportes -->
-                <button class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Reportes</span>
-                </button>
-
-                <!-- Config TV - ACTIVO -->
-                <a href="{{ route('admin.tv-config') }}" class="sidebar-item group w-full flex items-center justify-start text-white bg-white/20 p-3 rounded-lg transition-all duration-200 hover:translate-x-1 active-indicator">
-                    <svg class="mr-3 h-5 w-5 text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Config TV</span>
-                </a>
-
-                <!-- Separador -->
-                <div class="py-2">
-                    <div class="border-t border-white/20"></div>
-                    <p class="text-xs text-blue-200 mt-2 px-3 font-medium uppercase tracking-wider">Otros</p>
-                </div>
-
-                <!-- Configuración -->
-                <button class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Configuración</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 md:ml-0">
-            <div class="p-4 md:p-6">
-                <div class="bg-white rounded-lg shadow-md p-4 md:p-6 max-w-4xl mx-auto">
+@section('content')
+    <div class="bg-white rounded-lg shadow-md p-4 md:p-6 max-w-7xl mx-auto">
                     <!-- Header -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <h1 class="text-xl md:text-2xl font-bold text-gray-800">Configuración del TV</h1>
-                        <a href="{{ route('tv.display') }}" target="_blank" class="bg-hospital-blue hover:bg-hospital-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
+                        <a href="{{ route('tv.display') }}" target="_blank" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer w-full sm:w-auto flex items-center justify-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                             </svg>
@@ -323,17 +235,17 @@
 
                         <!-- Botones -->
                         <div class="flex justify-end space-x-3 pt-4 border-t">
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 onclick="resetForm()"
-                                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors"
+                                class="px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors"
                             >
                                 Restablecer
                             </button>
                             <button
                                 type="submit"
                                 id="submitBtn"
-                                class="px-4 py-2 bg-hospital-blue hover:bg-hospital-blue-hover text-white rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <span id="submitText">Guardar Configuración</span>
                                 <span id="loadingText" class="hidden">Guardando...</span>
@@ -347,7 +259,7 @@
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-lg font-semibold text-gray-800">Gestión de Multimedia</h2>
                             @if($multimedia->count() > 0)
-                            <button onclick="showUploadModal()" class="bg-hospital-blue hover:bg-hospital-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
+                            <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -359,11 +271,11 @@
                         <!-- Lista de multimedia -->
                         <div id="multimediaList" class="space-y-4">
                             @forelse($multimedia as $item)
-                                <div class="sortable-item bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-200" data-id="{{ $item->id }}" data-order="{{ $item->orden }}">
+                                <div class="sortable-item bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-200" data-id="{{ $item->id }}" data-order="{{ $item->orden }}" draggable="true">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-4">
                                             <!-- Drag handle -->
-                                            <div class="cursor-move text-gray-400 hover:text-gray-600">
+                                            <div class="drag-handle cursor-move text-gray-400 hover:text-gray-600">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                                                 </svg>
@@ -417,7 +329,7 @@
                                     <h3 class="mt-2 text-sm font-medium text-gray-900">No hay archivos multimedia</h3>
                                     <p class="mt-1 text-sm text-gray-500">Comience subiendo imágenes o videos para mostrar en el TV.</p>
                                     <div class="mt-6">
-                                        <button onclick="showUploadModal()" class="bg-hospital-blue hover:bg-hospital-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center mx-auto">
+                                        <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer flex items-center mx-auto">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                             </svg>
@@ -429,12 +341,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+@endsection
 
+@section('scripts')
     <!-- Modal de éxito -->
-    <div id="successModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
@@ -450,7 +361,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <button onclick="closeSuccessModal()" class="px-4 py-2 bg-hospital-blue text-white rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer">
+                    <button onclick="closeSuccessModal()" class="bg-hospital-blue text-white px-4 py-2 rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer">
                         Aceptar
                     </button>
                 </div>
@@ -514,13 +425,16 @@
 
         // Función para mostrar modal de subida de archivos
         function showUploadModal() {
-            document.getElementById('uploadModal').style.display = 'flex';
+            const modal = document.getElementById('uploadModal');
+            if (modal) modal.style.display = 'flex';
         }
 
         // Cerrar modal de subida
         function closeUploadModal() {
-            document.getElementById('uploadModal').style.display = 'none';
-            document.getElementById('uploadForm').reset();
+            const modal = document.getElementById('uploadModal');
+            const form = document.getElementById('uploadForm');
+            if (modal) modal.style.display = 'none';
+            if (form) form.reset();
             hideUploadProgress();
             hideFilePreview();
         }
@@ -549,103 +463,179 @@
                 return;
             }
 
-            const formData = new FormData(form);
-
-            // Debug: Mostrar datos que se están enviando
-            console.log('Datos del formulario:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
+            // Verificar tamaño del archivo (500MB = 524288000 bytes)
+            const maxSize = 524288000; // 500MB en bytes
+            if (archivo.size > maxSize) {
+                const sizeMB = (archivo.size / 1024 / 1024).toFixed(2);
+                showUploadErrorModal(`El archivo es demasiado grande (${sizeMB}MB). El tamaño máximo permitido es 500MB.`);
+                return;
             }
+
+            const formData = new FormData(form);
 
             showUploadProgress();
 
-            fetch('{{ route("admin.tv-config.multimedia.store") }}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data);
-                if (data.success) {
-                    closeUploadModal();
-                    showUploadSuccessModal();
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    hideUploadProgress();
-                    let errorMessage = data.message || 'Error al subir el archivo';
+            // Usar XMLHttpRequest para tener progreso real
+            const xhr = new XMLHttpRequest();
 
-                    // Si hay errores de validación específicos, mostrarlos
-                    if (data.errors) {
-                        const errorList = Object.values(data.errors).flat();
-                        errorMessage = 'Errores de validación: ' + errorList.join(', ');
-                    }
-
-                    console.error('Error del servidor:', data);
-                    showUploadErrorModal(errorMessage);
+            // Configurar progreso de subida
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    updateUploadProgress(percentComplete);
                 }
-            })
-            .catch(error => {
-                hideUploadProgress();
-                console.error('Error:', error);
-                showUploadErrorModal('Error de conexión al subir el archivo: ' + error.message);
             });
+
+            xhr.addEventListener('load', function() {
+                if (xhr.status === 413) {
+                    hideUploadProgress();
+                    showUploadErrorModal('El archivo es demasiado grande. El tamaño máximo permitido es 500MB.');
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        closeUploadModal();
+                        showUploadSuccessModal();
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        hideUploadProgress();
+                        let errorMessage = data.message || 'Error al subir el archivo';
+
+                        // Si hay errores de validación específicos, mostrarlos
+                        if (data.errors) {
+                            const errorList = Object.values(data.errors).flat();
+                            errorMessage = 'Errores de validación: ' + errorList.join(', ');
+                        }
+
+                        showUploadErrorModal(errorMessage);
+                    }
+                } catch (error) {
+                    hideUploadProgress();
+                    showUploadErrorModal('Error al procesar la respuesta del servidor');
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                hideUploadProgress();
+                showUploadErrorModal('Error de conexión al subir el archivo');
+            });
+
+            xhr.addEventListener('timeout', function() {
+                hideUploadProgress();
+                showUploadErrorModal('Tiempo de espera agotado. El archivo puede ser demasiado grande.');
+            });
+
+            // Configurar y enviar la petición
+            xhr.open('POST', '{{ route("admin.tv-config.multimedia.store") }}');
+            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            xhr.timeout = 600000; // 10 minutos de timeout
+            xhr.send(formData);
         }
 
         // Mostrar progreso de subida
         function showUploadProgress() {
-            document.getElementById('uploadProgress').style.display = 'block';
-            document.getElementById('uploadBtn').disabled = true;
-            document.getElementById('uploadBtnText').style.display = 'none';
-            document.getElementById('uploadBtnLoading').style.display = 'inline';
+            const progress = document.getElementById('uploadProgress');
+            const btn = document.getElementById('uploadBtn');
+            const btnText = document.getElementById('uploadBtnText');
+            const btnLoading = document.getElementById('uploadBtnLoading');
+
+            if (progress) progress.style.display = 'block';
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.style.display = 'none';
+            if (btnLoading) btnLoading.style.display = 'inline';
+
+            // Resetear progreso
+            updateUploadProgress(0);
+        }
+
+        // Actualizar progreso de subida
+        function updateUploadProgress(percent) {
+            const progressBar = document.querySelector('#uploadProgress .bg-hospital-blue');
+            const progressText = document.getElementById('progressText');
+
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
+
+            if (progressText) {
+                if (percent < 100) {
+                    progressText.textContent = `Subiendo archivo... ${Math.round(percent)}%`;
+                } else {
+                    progressText.textContent = 'Procesando archivo...';
+                }
+            }
         }
 
         // Ocultar progreso de subida
         function hideUploadProgress() {
-            document.getElementById('uploadProgress').style.display = 'none';
-            document.getElementById('uploadBtn').disabled = false;
-            document.getElementById('uploadBtnText').style.display = 'inline';
-            document.getElementById('uploadBtnLoading').style.display = 'none';
+            const progress = document.getElementById('uploadProgress');
+            const btn = document.getElementById('uploadBtn');
+            const btnText = document.getElementById('uploadBtnText');
+            const btnLoading = document.getElementById('uploadBtnLoading');
+
+            if (progress) progress.style.display = 'none';
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.style.display = 'inline';
+            if (btnLoading) btnLoading.style.display = 'none';
         }
 
         // Mostrar modal de éxito de subida
         function showUploadSuccessModal() {
-            document.getElementById('uploadSuccessModal').style.display = 'flex';
+            const modal = document.getElementById('uploadSuccessModal');
+            if (modal) modal.style.display = 'flex';
         }
 
         // Cerrar modal de éxito de subida
         function closeUploadSuccessModal() {
-            document.getElementById('uploadSuccessModal').style.display = 'none';
+            const modal = document.getElementById('uploadSuccessModal');
+            if (modal) modal.style.display = 'none';
         }
 
         // Mostrar modal de error de subida
         function showUploadErrorModal(message) {
-            document.getElementById('uploadErrorMessage').textContent = message;
-            document.getElementById('uploadErrorModal').style.display = 'flex';
+            const messageEl = document.getElementById('uploadErrorMessage');
+            const modal = document.getElementById('uploadErrorModal');
+            if (messageEl) messageEl.textContent = message;
+            if (modal) modal.style.display = 'flex';
         }
 
         // Cerrar modal de error de subida
         function closeUploadErrorModal() {
-            document.getElementById('uploadErrorModal').style.display = 'none';
+            const modal = document.getElementById('uploadErrorModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Mostrar modal de error de archivo (para validaciones de selección)
+        function showFileErrorModal(message) {
+            const messageEl = document.getElementById('fileErrorMessage');
+            const modal = document.getElementById('fileErrorModal');
+            if (messageEl) messageEl.textContent = message;
+            if (modal) modal.style.display = 'flex';
+        }
+
+        // Cerrar modal de error de archivo
+        function closeFileErrorModal() {
+            const modal = document.getElementById('fileErrorModal');
+            if (modal) modal.style.display = 'none';
         }
 
         // Confirmar eliminación
         function confirmDelete(id, nombre) {
             deleteItemId = id;
-            document.getElementById('deleteFileName').textContent = nombre;
-            document.getElementById('deleteModal').style.display = 'flex';
+            const fileName = document.getElementById('deleteFileName');
+            const modal = document.getElementById('deleteModal');
+            if (fileName) fileName.textContent = nombre;
+            if (modal) modal.style.display = 'flex';
         }
 
         // Cerrar modal de eliminación
         function closeDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
+            const modal = document.getElementById('deleteModal');
+            if (modal) modal.style.display = 'none';
             deleteItemId = null;
         }
 
@@ -680,23 +670,28 @@
 
         // Mostrar modal de éxito de eliminación
         function showDeleteSuccessModal() {
-            document.getElementById('deleteSuccessModal').style.display = 'flex';
+            const modal = document.getElementById('deleteSuccessModal');
+            if (modal) modal.style.display = 'flex';
         }
 
         // Cerrar modal de éxito de eliminación
         function closeDeleteSuccessModal() {
-            document.getElementById('deleteSuccessModal').style.display = 'none';
+            const modal = document.getElementById('deleteSuccessModal');
+            if (modal) modal.style.display = 'none';
         }
 
         // Mostrar modal de error de eliminación
         function showDeleteErrorModal(message) {
-            document.getElementById('deleteErrorMessage').textContent = message;
-            document.getElementById('deleteErrorModal').style.display = 'flex';
+            const messageEl = document.getElementById('deleteErrorMessage');
+            const modal = document.getElementById('deleteErrorModal');
+            if (messageEl) messageEl.textContent = message;
+            if (modal) modal.style.display = 'flex';
         }
 
         // Cerrar modal de error de eliminación
         function closeDeleteErrorModal() {
-            document.getElementById('deleteErrorModal').style.display = 'none';
+            const modal = document.getElementById('deleteErrorModal');
+            if (modal) modal.style.display = 'none';
         }
 
         // Manejar selección de archivo
@@ -705,7 +700,8 @@
             if (!file) {
                 hideFilePreview();
                 // Limpiar campo nombre también
-                document.getElementById('nombre').value = '';
+                const nombreField = document.getElementById('nombre');
+                if (nombreField) nombreField.value = '';
                 return;
             }
 
@@ -721,16 +717,30 @@
             const isVideo = videoExtensions.includes(fileExtension);
 
             if (!isImage && !isVideo) {
-                alert('Formato de archivo no válido. Use: JPG, PNG, GIF, MP4, MOV, AVI');
+                showFileErrorModal('Formato de archivo no válido. Use: JPG, PNG, GIF, MP4, MOV, AVI');
                 input.value = '';
                 hideFilePreview();
-                document.getElementById('nombre').value = '';
+                const nombreField = document.getElementById('nombre');
+                if (nombreField) nombreField.value = '';
+                return;
+            }
+
+            // Verificar tamaño del archivo (500MB = 524288000 bytes)
+            const maxSize = 524288000; // 500MB en bytes
+            if (file.size > maxSize) {
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                showFileErrorModal(`El archivo es demasiado grande (${sizeMB}MB). El tamaño máximo permitido es 500MB.`);
+                input.value = '';
+                hideFilePreview();
+                const nombreField = document.getElementById('nombre');
+                if (nombreField) nombreField.value = '';
                 return;
             }
 
             // Llenar automáticamente el campo nombre con el nombre del archivo (sin extensión)
             const fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-            document.getElementById('nombre').value = fileNameWithoutExtension;
+            const nombreField = document.getElementById('nombre');
+            if (nombreField) nombreField.value = fileNameWithoutExtension;
 
             // Mostrar preview
             showFilePreview(file, fileName, fileSize, isImage, isVideo);
@@ -758,9 +768,16 @@
 
             if (isImage) {
                 const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
+                const objectURL = URL.createObjectURL(file);
+                img.src = objectURL;
                 img.className = 'w-12 h-12 object-cover rounded';
-                img.onload = () => URL.revokeObjectURL(img.src);
+                img.onload = () => {
+                    // Revocar URL después de un pequeño delay para asegurar que se cargue
+                    setTimeout(() => URL.revokeObjectURL(objectURL), 100);
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(objectURL);
+                };
                 container.appendChild(img);
             } else {
                 const videoIcon = document.createElement('div');
@@ -778,7 +795,8 @@
 
         // Ocultar preview del archivo
         function hideFilePreview() {
-            document.getElementById('filePreview').classList.add('hidden');
+            const preview = document.getElementById('filePreview');
+            if (preview) preview.classList.add('hidden');
             resetDurationField();
         }
 
@@ -788,15 +806,17 @@
             const duracionLabel = document.getElementById('duracionLabel');
             const duracionHelp = document.getElementById('duracionHelp');
 
-            duracionLabel.textContent = 'Duración (segundos)';
-            duracionHelp.textContent = 'Entre 1 y 300 segundos - Tiempo que se mostrará la imagen';
+            if (duracionLabel) duracionLabel.textContent = 'Duración (segundos)';
+            if (duracionHelp) duracionHelp.textContent = 'Entre 1 y 300 segundos - Tiempo que se mostrará la imagen';
 
-            duracionInput.disabled = false;
-            duracionInput.readOnly = false;
-            duracionInput.value = 10;
-            duracionInput.min = 1;
-            duracionInput.max = 300;
-            duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent';
+            if (duracionInput) {
+                duracionInput.disabled = false;
+                duracionInput.readOnly = false;
+                duracionInput.value = 10;
+                duracionInput.min = 1;
+                duracionInput.max = 300;
+                duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent';
+            }
         }
 
         // Configurar duración para videos
@@ -805,35 +825,41 @@
             const duracionLabel = document.getElementById('duracionLabel');
             const duracionHelp = document.getElementById('duracionHelp');
 
-            duracionLabel.textContent = 'Duración (automática)';
-            duracionHelp.textContent = 'La duración se detectará automáticamente del video';
+            if (duracionLabel) duracionLabel.textContent = 'Duración (automática)';
+            if (duracionHelp) duracionHelp.textContent = 'La duración se detectará automáticamente del video';
 
             // Crear elemento video temporal para obtener duración
             const video = document.createElement('video');
             video.preload = 'metadata';
 
+            const objectURL = URL.createObjectURL(file);
+
             video.onloadedmetadata = function() {
                 const duration = Math.ceil(video.duration);
-                duracionInput.value = duration;
-                // NO deshabilitar el campo para que se envíe en el formulario
-                duracionInput.readOnly = true;
-                duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed';
+                if (duracionInput) {
+                    duracionInput.value = duration;
+                    // NO deshabilitar el campo para que se envíe en el formulario
+                    duracionInput.readOnly = true;
+                    duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed';
+                }
 
-                duracionHelp.textContent = `Duración detectada: ${duration} segundos`;
+                if (duracionHelp) duracionHelp.textContent = `Duración detectada: ${duration} segundos`;
 
-                // Limpiar objeto URL
-                URL.revokeObjectURL(video.src);
+                // Limpiar objeto URL después de un delay
+                setTimeout(() => URL.revokeObjectURL(objectURL), 100);
             };
 
             video.onerror = function() {
-                duracionHelp.textContent = 'No se pudo detectar la duración. Ingrese manualmente.';
-                duracionInput.readOnly = false;
-                duracionInput.value = 30;
-                duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent';
-                URL.revokeObjectURL(video.src);
+                if (duracionHelp) duracionHelp.textContent = 'No se pudo detectar la duración. Ingrese manualmente.';
+                if (duracionInput) {
+                    duracionInput.readOnly = false;
+                    duracionInput.value = 30;
+                    duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent';
+                }
+                URL.revokeObjectURL(objectURL);
             };
 
-            video.src = URL.createObjectURL(file);
+            video.src = objectURL;
         }
 
         // Resetear campo de duración
@@ -842,24 +868,152 @@
             const duracionLabel = document.getElementById('duracionLabel');
             const duracionHelp = document.getElementById('duracionHelp');
 
-            duracionLabel.textContent = 'Duración (segundos)';
-            duracionHelp.textContent = 'Entre 1 y 300 segundos';
+            if (duracionLabel) duracionLabel.textContent = 'Duración (segundos)';
+            if (duracionHelp) duracionHelp.textContent = 'Entre 1 y 300 segundos';
 
-            duracionInput.disabled = false;
-            duracionInput.readOnly = false;
-            duracionInput.value = 10;
-            duracionInput.min = 1;
-            duracionInput.max = 300;
-            duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent';
+            if (duracionInput) {
+                duracionInput.disabled = false;
+                duracionInput.readOnly = false;
+                duracionInput.value = 10;
+                duracionInput.min = 1;
+                duracionInput.max = 300;
+                duracionInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent';
+            }
+        }
+
+        // Activar/desactivar archivo multimedia
+        function toggleActive(id) {
+            fetch(`{{ url('/tv-config/multimedia') }}/${id}/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito y recargar la página
+                    showSuccessModal();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert('Error al cambiar el estado: ' + (data.message || 'Error desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión al cambiar el estado');
+            });
+        }
+
+        // Inicializar funcionalidad de ordenamiento
+        function initializeSortable() {
+            const list = document.getElementById('multimediaList');
+            if (!list || list.children.length === 0) return;
+
+            // Implementación simple de drag and drop
+            let draggedElement = null;
+
+            list.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('sortable-item')) {
+                    draggedElement = e.target;
+                    e.target.classList.add('dragging');
+                }
+            });
+
+            list.addEventListener('dragend', function(e) {
+                if (e.target.classList.contains('sortable-item')) {
+                    e.target.classList.remove('dragging');
+                    draggedElement = null;
+                }
+            });
+
+            list.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            list.addEventListener('drop', function(e) {
+                e.preventDefault();
+
+                if (!draggedElement) return;
+
+                const afterElement = getDragAfterElement(list, e.clientY);
+
+                if (afterElement == null) {
+                    list.appendChild(draggedElement);
+                } else {
+                    list.insertBefore(draggedElement, afterElement);
+                }
+
+                // Actualizar orden en el servidor
+                updateMultimediaOrder();
+            });
+        }
+
+        // Obtener elemento después del cual insertar
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Actualizar orden en el servidor
+        function updateMultimediaOrder() {
+            const items = document.querySelectorAll('.sortable-item');
+            const orderData = [];
+
+            items.forEach((item, index) => {
+                orderData.push({
+                    id: parseInt(item.dataset.id),
+                    orden: index + 1
+                });
+            });
+
+            fetch('{{ route('admin.tv-config.multimedia.order') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ items: orderData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    showSuccessModal();
+                } else {
+                    alert('Error al actualizar el orden');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión al actualizar el orden');
+            });
         }
 
         // Inicializar la primera pestaña como activa al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             showTab('ticker');
+            // Inicializar funcionalidad de ordenamiento
+            initializeSortable();
         });
 
         // Manejar envío del formulario
-        document.getElementById('tvConfigForm').addEventListener('submit', function(e) {
+        const tvConfigForm = document.getElementById('tvConfigForm');
+        if (tvConfigForm) {
+            tvConfigForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const submitBtn = document.getElementById('submitBtn');
@@ -867,9 +1021,9 @@
             const loadingText = document.getElementById('loadingText');
 
             // Mostrar estado de carga
-            submitBtn.disabled = true;
-            submitText.classList.add('hidden');
-            loadingText.classList.remove('hidden');
+            if (submitBtn) submitBtn.disabled = true;
+            if (submitText) submitText.classList.add('hidden');
+            if (loadingText) loadingText.classList.remove('hidden');
 
             const formData = new FormData(this);
 
@@ -900,11 +1054,12 @@
             })
             .finally(() => {
                 // Restaurar estado del botón
-                submitBtn.disabled = false;
-                submitText.classList.remove('hidden');
-                loadingText.classList.add('hidden');
+                if (submitBtn) submitBtn.disabled = false;
+                if (submitText) submitText.classList.remove('hidden');
+                if (loadingText) loadingText.classList.add('hidden');
             });
-        });
+            });
+        }
 
         // Mostrar mensaje de éxito si viene de redirección
         @if(session('success'))
@@ -912,6 +1067,7 @@
         @endif
     </script>
 
+    <!-- Modales -->
     <!-- Modal de subida de archivos -->
     <div id="uploadModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
@@ -931,7 +1087,7 @@
                             <input type="file" id="archivo" name="archivo" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.avi" required
                                    onchange="handleFileSelect(this)"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent">
-                            <p class="mt-1 text-xs text-gray-500">Máximo 50MB. Formatos: JPG, PNG, GIF, MP4, MOV, AVI</p>
+                            <p class="mt-1 text-xs text-gray-500">Máximo 500MB. Formatos: JPG, PNG, GIF, MP4, MOV, AVI</p>
 
                             <!-- Preview del archivo -->
                             <div id="filePreview" class="mt-3 hidden">
@@ -965,10 +1121,10 @@
 
                     <!-- Barra de progreso -->
                     <div id="uploadProgress" class="mt-4" style="display: none;">
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-hospital-blue h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-hospital-blue h-3 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
                         </div>
-                        <p id="progressText" class="text-sm text-gray-600 mt-1">Subiendo archivo...</p>
+                        <p id="progressText" class="text-sm text-gray-600 mt-2 text-center">Preparando subida...</p>
                     </div>
                 </form>
 
@@ -979,56 +1135,6 @@
                     <button onclick="uploadFile()" id="uploadBtn" class="px-4 py-2 bg-hospital-blue text-white rounded-md text-sm font-medium hover:bg-hospital-blue-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hospital-blue transition-colors">
                         <span id="uploadBtnText">Subir Archivo</span>
                         <span id="uploadBtnLoading" class="hidden">Subiendo...</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de éxito de subida -->
-    <div id="uploadSuccessModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
-            <div class="p-6">
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-center text-gray-900 mt-2">¡Archivo subido!</h3>
-                    <p class="mt-2 text-sm text-center text-gray-500">
-                        El archivo se ha subido correctamente y estará disponible en el TV.
-                    </p>
-                </div>
-
-                <div class="mt-6 flex justify-center">
-                    <button onclick="closeUploadSuccessModal()" class="px-4 py-2 bg-hospital-blue text-white rounded hover:bg-hospital-blue-hover transition-colors cursor-pointer">
-                        Aceptar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de error de subida -->
-    <div id="uploadErrorModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
-            <div class="p-6">
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-medium text-center text-gray-900 mt-2">Error al subir archivo</h3>
-                    <p id="uploadErrorMessage" class="mt-2 text-sm text-center text-gray-500">
-                        Ha ocurrido un error al subir el archivo.
-                    </p>
-                </div>
-
-                <div class="mt-6 flex justify-center">
-                    <button onclick="closeUploadErrorModal()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer">
-                        Aceptar
                     </button>
                 </div>
             </div>
@@ -1113,5 +1219,29 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- Modal de error de archivo -->
+    <div id="fileErrorModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <div class="mb-4">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-center text-gray-900 mt-2">Error de Archivo</h3>
+                    <p id="fileErrorMessage" class="mt-2 text-sm text-center text-gray-500">
+                        Ha ocurrido un error con el archivo seleccionado.
+                    </p>
+                </div>
+
+                <div class="mt-6 flex justify-center">
+                    <button onclick="closeFileErrorModal()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

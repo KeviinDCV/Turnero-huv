@@ -93,14 +93,50 @@ class TvConfigController extends Controller
      */
     public function storeMultimedia(Request $request)
     {
+        // Configurar límites de PHP para archivos grandes
+        ini_set('upload_max_filesize', '600M');
+        ini_set('post_max_size', '600M');
+        ini_set('max_execution_time', '600');
+        ini_set('max_input_time', '600');
+        ini_set('memory_limit', '512M');
+
         try {
+            // Verificar si el archivo fue subido correctamente
+            if (!$request->hasFile('archivo')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se recibió ningún archivo. Puede que el archivo sea demasiado grande para el servidor.'
+                ], 400);
+            }
+
+            $archivo = $request->file('archivo');
+
+            // Verificar si hubo errores en la subida
+            if ($archivo->getError() !== UPLOAD_ERR_OK) {
+                $errorMessages = [
+                    UPLOAD_ERR_INI_SIZE => 'El archivo excede el tamaño máximo permitido por el servidor.',
+                    UPLOAD_ERR_FORM_SIZE => 'El archivo excede el tamaño máximo permitido.',
+                    UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente.',
+                    UPLOAD_ERR_NO_FILE => 'No se subió ningún archivo.',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal.',
+                    UPLOAD_ERR_CANT_WRITE => 'Error al escribir el archivo en el disco.',
+                    UPLOAD_ERR_EXTENSION => 'Una extensión de PHP detuvo la subida del archivo.'
+                ];
+
+                $errorMessage = $errorMessages[$archivo->getError()] ?? 'Error desconocido al subir el archivo.';
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage
+                ], 400);
+            }
+
             $request->validate([
-                'archivo' => 'required|file|mimes:jpg,jpeg,png,gif,mp4,mov,avi|max:51200', // 50MB max
+                'archivo' => 'required|file|mimes:jpg,jpeg,png,gif,mp4,mov,avi|max:512000', // 500MB max
                 'nombre' => 'required|string|max:255',
                 'duracion' => 'required|integer|min:1|max:300' // 1-300 segundos
             ]);
 
-            $archivo = $request->file('archivo');
             $extension = $archivo->getClientOriginalExtension();
             $tipo = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif']) ? 'imagen' : 'video';
 

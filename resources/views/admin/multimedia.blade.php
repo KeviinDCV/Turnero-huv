@@ -1,35 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Multimedia - Turnero HUV</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+@extends('layouts.admin')
+
+@section('title', 'Gestión Multimedia')
+@section('styles')
     <style>
-        .bg-hospital-blue {
-            background-color: #064b9e;
-        }
-
-        .bg-hospital-blue-hover:hover {
-            background-color: #053a7a;
-        }
-
-        .text-hospital-blue {
-            color: #064b9e;
-        }
-
-        .border-hospital-blue {
-            border-color: #064b9e;
-        }
-
-        [x-cloak] {
-            display: none !important;
-        }
-
         /* Estilo para modal overlay */
         .modal-overlay {
             background-color: rgba(100, 116, 139, 0.25) !important;
@@ -83,165 +56,29 @@
             50% { background-color: rgb(22, 163, 74); }
         }
     </style>
-</head>
-<body class="min-h-screen bg-gray-100" x-data="{ sidebarOpen: false }">
-    <!-- Header -->
-    <header class="bg-hospital-blue text-white px-6 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <!-- Botón hamburguesa para móviles -->
-            <button @click="sidebarOpen = !sidebarOpen" class="md:hidden text-white hover:bg-hospital-blue-hover p-2 rounded">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-            <div class="text-2xl font-bold">
-                Turnero<span class="text-gray-300">HUV</span>
-            </div>
-        </div>
-        <div class="flex items-center space-x-4">
-            <span class="text-sm">Bienvenido, <span class="font-semibold">{{ $user->nombre_completo }}</span></span>
-            <form method="POST" action="{{ route('logout') }}" class="inline">
-                @csrf
-                <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-medium transition-colors">
-                    Cerrar Sesión
-                </button>
-            </form>
-        </div>
-    </header>
+@endsection
 
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside class="bg-hospital-blue text-white w-64 min-h-screen p-4 fixed md:relative z-30 transform transition-transform duration-300 ease-in-out"
-               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
-            
-            <!-- Overlay para móviles -->
-            <div x-show="sidebarOpen" @click="sidebarOpen = false" 
-                 class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-                 x-transition:enter="transition-opacity ease-linear duration-300"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 x-transition:leave="transition-opacity ease-linear duration-300"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"></div>
+@section('content')
 
-            <div class="space-y-2 relative z-30">
-                <!-- Dashboard -->
-                <a href="{{ route('admin.dashboard') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+    <div class="bg-white rounded-lg shadow-md p-4 md:p-6 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Gestión de Multimedia</h1>
+            <div class="flex space-x-2">
+                <a href="{{ route('tv.display') }}" target="_blank" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                     </svg>
-                    <span class="text-sm font-medium">Dashboard</span>
+                    Ver TV
                 </a>
-
-                <!-- Separador -->
-                <div class="py-2">
-                    <div class="border-t border-white/20"></div>
-                    <p class="text-xs text-blue-200 mt-2 px-3 font-medium uppercase tracking-wider">Gestión</p>
-                </div>
-
-                <!-- Usuarios -->
-                <a href="{{ route('admin.users') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                <button onclick="showUploadModal()" class="bg-hospital-blue hover:bg-hospital-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    <span class="text-sm font-medium">Usuarios</span>
-                </a>
-
-                <!-- Cajas -->
-                <a href="{{ route('admin.cajas') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Cajas</span>
-                </a>
-
-                <!-- Servicios -->
-                <a href="{{ route('admin.servicios') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Servicios</span>
-                </a>
-
-                <!-- Asignación de Servicios -->
-                <a href="{{ route('admin.asignacion-servicios') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Asignación Servicios</span>
-                </a>
-
-                <!-- Separador -->
-                <div class="py-2">
-                    <div class="border-t border-white/20"></div>
-                    <p class="text-xs text-blue-200 mt-2 px-3 font-medium uppercase tracking-wider">Sistema</p>
-                </div>
-
-                <!-- Reportes -->
-                <button class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Reportes</span>
-                </button>
-
-                <!-- Config TV -->
-                <a href="{{ route('admin.tv-config') }}" class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Config TV</span>
-                </a>
-
-                <!-- Multimedia - ACTIVO -->
-                <a href="{{ route('admin.multimedia') }}" class="sidebar-item group w-full flex items-center justify-start text-white bg-white/20 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m0 0V1a1 1 0 011-1h2a1 1 0 011 1v18a1 1 0 01-1 1H4a1 1 0 01-1-1V1a1 1 0 011-1h2a1 1 0 011 1v3m0 0h8m-8 0V1"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Multimedia</span>
-                </a>
-
-                <!-- Separador -->
-                <div class="py-2">
-                    <div class="border-t border-white/20"></div>
-                    <p class="text-xs text-blue-200 mt-2 px-3 font-medium uppercase tracking-wider">Otros</p>
-                </div>
-
-                <!-- Configuración -->
-                <button class="sidebar-item group w-full flex items-center justify-start text-blue-200 hover:text-white hover:bg-white/10 p-3 rounded-lg transition-all duration-200 hover:translate-x-1">
-                    <svg class="mr-3 h-5 w-5 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">Configuración</span>
+                    Subir Archivo
                 </button>
             </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 md:ml-0">
-            <div class="p-4 md:p-6">
-                <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
-                    <!-- Header -->
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                        <h1 class="text-xl md:text-2xl font-bold text-gray-800">Gestión de Multimedia</h1>
-                        <div class="flex space-x-2">
-                            <a href="{{ route('tv.display') }}" target="_blank" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                </svg>
-                                Ver TV
-                            </a>
-                            <button onclick="showUploadModal()" class="bg-hospital-blue hover:bg-hospital-blue-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                Subir Archivo
-                            </button>
-                        </div>
-                    </div>
+        </div>
 
                     <!-- Lista de multimedia -->
                     <div id="multimediaList" class="space-y-4">
@@ -311,9 +148,7 @@
                             </div>
                         @endforelse
                     </div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
 
     <!-- Modal de subida de archivos -->
@@ -454,7 +289,9 @@
             </div>
         </div>
     </div>
+@endsection
 
+@section('scripts')
     <script>
         // Variables globales
         let deleteItemId = null;
@@ -730,6 +567,4 @@
             }
         });
     </script>
-
-</body>
-</html>
+@endsection

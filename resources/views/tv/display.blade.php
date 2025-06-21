@@ -403,20 +403,52 @@
             fetch('/api/multimedia')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.multimedia && data.multimedia.length > 0) {
-                        multimediaList = data.multimedia;
-                        if (!isMediaPlaying) {
-                            startMediaPlayback();
+                    const newMultimediaList = data.multimedia || [];
+
+                    // Comparar si la lista ha cambiado
+                    const hasChanged = !arraysEqual(multimediaList, newMultimediaList);
+
+                    if (hasChanged) {
+                        console.log('Lista de multimedia actualizada');
+                        multimediaList = newMultimediaList;
+
+                        if (multimediaList.length > 0) {
+                            // Si hay multimedia y no se está reproduciendo, iniciar
+                            if (!isMediaPlaying) {
+                                startMediaPlayback();
+                            } else {
+                                // Si se está reproduciendo, verificar si el archivo actual sigue activo
+                                const currentMedia = multimediaList[currentMediaIndex];
+                                if (!currentMedia) {
+                                    // El archivo actual ya no existe, reiniciar desde el principio
+                                    currentMediaIndex = 0;
+                                    showCurrentMedia();
+                                }
+                            }
+                        } else {
+                            // No hay multimedia, mostrar placeholder
+                            showPlaceholder();
                         }
-                    } else {
-                        // No hay multimedia, mostrar placeholder
-                        showPlaceholder();
                     }
                 })
                 .catch(error => {
                     console.error('Error al cargar multimedia:', error);
                     showPlaceholder();
                 });
+        }
+
+        // Función auxiliar para comparar arrays de multimedia
+        function arraysEqual(arr1, arr2) {
+            if (arr1.length !== arr2.length) return false;
+
+            for (let i = 0; i < arr1.length; i++) {
+                if (arr1[i].id !== arr2[i].id ||
+                    arr1[i].activo !== arr2[i].activo ||
+                    arr1[i].orden !== arr2[i].orden) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // Mostrar placeholder cuando no hay multimedia con transición
@@ -598,8 +630,8 @@
         // Actualizar configuración del TV cada 5 segundos
         setInterval(updateTvConfig, 5000);
 
-        // Cargar multimedia cada 30 segundos para detectar cambios
-        setInterval(loadMultimedia, 30000);
+        // Cargar multimedia cada 5 segundos para detectar cambios
+        setInterval(loadMultimedia, 5000);
 
         // Funcionalidad del ticker
         function initializeTicker() {

@@ -1,0 +1,22 @@
+# Configuración para archivos multimedia grandes
+<IfModule mod_php.c>
+    php_value upload_max_filesize 600M
+    php_value post_max_size 600M
+    php_value max_execution_time 600
+    php_value max_input_time 600
+    php_value memory_limit 512M
+</IfModule>
+
+# Para PHP-FPM (si se usa)
+<IfModule mod_fcgid.c>
+    FcgidMaxRequestLen 629145600
+</IfModule>
+
+# Configuración de Apache para archivos grandes
+LimitRequestBody 629145600
+
+# Redireccionar al directorio public
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
