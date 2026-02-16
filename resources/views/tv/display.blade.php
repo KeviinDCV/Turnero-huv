@@ -1522,7 +1522,7 @@
                 setTimeout(() => {
                     console.log('⏰ Timeout completado, procesando siguiente turno...');
                     procesarColaAudio();
-                }, 1000); // Pausa de 1 segundo entre turnos de audio
+                }, 500); // Pausa de 500ms entre turnos de audio
             });
         }
 
@@ -2536,14 +2536,14 @@
                     console.log(`✅ Repetición ${repeticionActual} completada para ${turnoId}`);
                     
                     if (repeticionActual < repeticiones) {
-                        // Pausa de 1 segundo entre repeticiones
-                        console.log(`⏰ Pausa de 1 segundo antes de repetición ${repeticionActual + 1} para ${turnoId}`);
+                        // Pausa breve entre repeticiones
+                        console.log(`⏰ Pausa de 500ms antes de repetición ${repeticionActual + 1} para ${turnoId}`);
                         
                         // Ya no manejamos el modal aquí - se maneja al detectar el turno
                         
                         setTimeout(() => {
                             reproducirConRepeticion();
-                        }, 1000);
+                        }, 500);
                     } else {
                         // Todas las repeticiones completadas
                         console.log(`🎉 Todas las repeticiones completadas para ${turnoId}`);
@@ -2626,8 +2626,8 @@
 
             audio.volume = targetVolume;
             
-            // Aumentar la velocidad de reproducción para que suene más natural (1.25x más rápido)
-            audio.playbackRate = 1.23;
+            // Aumentar la velocidad de reproducción para que suene más natural y rápido
+            audio.playbackRate = 1.40;
 
             // Log para debugging del volumen
             console.log(`🔊 Reproduciendo: ${audioFile.split('/').pop()} - Volumen: ${targetVolume}, Ganancia: ${gainValue}x, Velocidad: ${audio.playbackRate}x`);
@@ -2680,7 +2680,7 @@
                         // Continuar con el siguiente archivo
                         setTimeout(() => {
                             playAudioSequence(audioFiles, index + 1, onComplete);
-                        }, 200);
+                        }, 80);
                     }
                 }, 10000);
 
@@ -2707,7 +2707,7 @@
                         // Pequeña pausa entre archivos para que suene más natural
                         setTimeout(() => {
                             playAudioSequence(audioFiles, index + 1, onComplete);
-                        }, 200);
+                        }, 80);
                     }
                 };
 
@@ -2736,7 +2736,7 @@
                         // Continuar con el siguiente archivo aunque haya error
                         setTimeout(() => {
                             playAudioSequence(audioFiles, index + 1, onComplete);
-                        }, 200);
+                        }, 80);
                     }
                 };
 
