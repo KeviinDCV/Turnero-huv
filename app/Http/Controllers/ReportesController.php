@@ -25,6 +25,56 @@ class ReportesController extends Controller
     }
 
     /**
+     * Formatea una cantidad de segundos a un texto legible.
+     * Ejemplos:
+     *   45     => "45s"
+     *   125    => "2m 5s"
+     *   3725   => "1h 2m 5s"
+     *   86461  => "1d 0h 1m 1s"
+     */
+    private function formatearDuracionSegundos($segundos)
+    {
+        if ($segundos === null || $segundos === '' || !is_numeric($segundos)) {
+            return 'N/A';
+        }
+
+        $segundos = (int) round((float) $segundos);
+
+        if ($segundos <= 0) {
+            return '0s';
+        }
+
+        $dias    = intdiv($segundos, 86400);
+        $resto   = $segundos % 86400;
+        $horas   = intdiv($resto, 3600);
+        $resto   = $resto % 3600;
+        $minutos = intdiv($resto, 60);
+        $segs    = $resto % 60;
+
+        $partes = [];
+        if ($dias > 0)    $partes[] = $dias . 'd';
+        if ($horas > 0)   $partes[] = $horas . 'h';
+        if ($minutos > 0) $partes[] = $minutos . 'm';
+        // Mostrar segundos solo si no hay días/horas o si es la única unidad
+        if ($segs > 0 && $dias === 0) {
+            $partes[] = $segs . 's';
+        }
+
+        return implode(' ', $partes) ?: '0s';
+    }
+
+    /**
+     * Formatea minutos (decimales) a un texto legible reusando el formateador en segundos.
+     */
+    private function formatearDuracionMinutos($minutos)
+    {
+        if ($minutos === null || $minutos === '' || !is_numeric($minutos)) {
+            return 'N/A';
+        }
+        return $this->formatearDuracionSegundos(((float) $minutos) * 60);
+    }
+
+    /**
      * Mostrar la vista principal de reportes
      */
     public function index()
@@ -653,8 +703,7 @@ class ReportesController extends Controller
 
         $row++;
         $sheet->setCellValue('A' . $row, 'Tiempo Promedio de Atención:');
-        $tiempoPromedio = $resumen['tiempo_promedio_atencion'] ? round($resumen['tiempo_promedio_atencion'] / 60, 2) . ' minutos' : 'N/A';
-        $sheet->setCellValue('B' . $row, $tiempoPromedio);
+        $sheet->setCellValue('B' . $row, $this->formatearDuracionSegundos($resumen['tiempo_promedio_atencion']));
 
         // Aplicar estilos
         $sheet->getStyle('A6:B' . $row)->applyFromArray([
@@ -690,7 +739,7 @@ class ReportesController extends Controller
             'H1' => 'Fecha Creación',
             'I1' => 'Fecha Llamado',
             'J1' => 'Fecha Atención',
-            'K1' => 'Duración (min)'
+            'K1' => 'Duración'
         ];
 
         foreach ($headers as $cell => $header) {
@@ -725,7 +774,7 @@ class ReportesController extends Controller
             $sheet->setCellValue('H' . $row, $turno->fecha_creacion ? Carbon::parse($turno->fecha_creacion)->format('d/m/Y H:i:s') : 'N/A');
             $sheet->setCellValue('I' . $row, $turno->fecha_llamado ? Carbon::parse($turno->fecha_llamado)->format('d/m/Y H:i:s') : 'N/A');
             $sheet->setCellValue('J' . $row, $turno->fecha_atencion ? Carbon::parse($turno->fecha_atencion)->format('d/m/Y H:i:s') : 'N/A');
-            $sheet->setCellValue('K' . $row, $turno->duracion_atencion ? round($turno->duracion_atencion / 60, 2) : 'N/A');
+            $sheet->setCellValue('K' . $row, $this->formatearDuracionSegundos($turno->duracion_atencion));
             $row++;
         }
 
@@ -761,7 +810,7 @@ class ReportesController extends Controller
             'C1' => 'Atendidos',
             'D1' => 'Pendientes',
             'E1' => 'Cancelados',
-            'F1' => 'Tiempo Promedio (min)'
+            'F1' => 'Tiempo Promedio'
         ];
 
         foreach ($headers as $cell => $header) {
@@ -791,7 +840,7 @@ class ReportesController extends Controller
             $sheet->setCellValue('C' . $row, $datos['atendidos']);
             $sheet->setCellValue('D' . $row, $datos['pendientes']);
             $sheet->setCellValue('E' . $row, $datos['cancelados']);
-            $sheet->setCellValue('F' . $row, $datos['tiempo_promedio'] ? round($datos['tiempo_promedio'] / 60, 2) : 'N/A');
+            $sheet->setCellValue('F' . $row, $this->formatearDuracionSegundos($datos['tiempo_promedio']));
             $row++;
         }
 
@@ -826,11 +875,11 @@ class ReportesController extends Controller
         $sheet->setCellValue('C1', 'Total Turnos');
         $sheet->setCellValue('D1', 'Atendidos');
         $sheet->setCellValue('E1', 'Aplazados');
-        $sheet->setCellValue('F1', 'Tiempo Prom. Atención (min)');
-        $sheet->setCellValue('G1', 'Tiempo Total Atención (min)');
-        $sheet->setCellValue('H1', 'Tiempo Entre Turnos (min)');
+        $sheet->setCellValue('F1', 'Tiempo Prom. Atención');
+        $sheet->setCellValue('G1', 'Tiempo Total Atención');
+        $sheet->setCellValue('H1', 'Tiempo Entre Turnos');
         $sheet->setCellValue('I1', 'Actividades Canal');
-        $sheet->setCellValue('J1', 'Tiempo Canal (hrs)');
+        $sheet->setCellValue('J1', 'Tiempo Canal');
 
         // Aplicar estilo a encabezados
         $sheet->getStyle('A1:J1')->applyFromArray([
@@ -855,11 +904,14 @@ class ReportesController extends Controller
             $sheet->setCellValue('C' . $row, $datos['total']);
             $sheet->setCellValue('D' . $row, $datos['atendidos']);
             $sheet->setCellValue('E' . $row, $datos['aplazados']);
-            $sheet->setCellValue('F' . $row, $datos['tiempo_promedio_atencion']);
-            $sheet->setCellValue('G' . $row, $datos['tiempo_total_atencion']);
-            $sheet->setCellValue('H' . $row, $datos['tiempo_promedio_entre_turnos']);
+            // duracion_atencion se almacena en segundos -> formato inteligente (h/m/s)
+            $sheet->setCellValue('F' . $row, $this->formatearDuracionSegundos($datos['tiempo_promedio_atencion']));
+            $sheet->setCellValue('G' . $row, $this->formatearDuracionSegundos($datos['tiempo_total_atencion']));
+            // tiempo_promedio_entre_turnos ya está calculado en minutos (diffInMinutes)
+            $sheet->setCellValue('H' . $row, $this->formatearDuracionMinutos($datos['tiempo_promedio_entre_turnos']));
             $sheet->setCellValue('I' . $row, $datos['cantidad_actividades_canal']);
-            $sheet->setCellValue('J' . $row, $datos['tiempo_total_canal_horas']);
+            // tiempo_total_canal_minutos -> formato inteligente
+            $sheet->setCellValue('J' . $row, $this->formatearDuracionMinutos($datos['tiempo_total_canal_minutos']));
             $row++;
         }
 
@@ -895,7 +947,7 @@ class ReportesController extends Controller
         $sheet->setCellValue('C1', 'Hora Llamado');
         $sheet->setCellValue('D1', 'Hora Atención');
         $sheet->setCellValue('E1', 'Hora Finalización');
-        $sheet->setCellValue('F1', 'Duración (min)');
+        $sheet->setCellValue('F1', 'Duración');
         $sheet->setCellValue('G1', 'Caja');
 
         // Estilo encabezado
@@ -913,7 +965,8 @@ class ReportesController extends Controller
             $sheet->setCellValue('C' . $row, $turno['fecha_llamado']);
             $sheet->setCellValue('D' . $row, $turno['fecha_atencion']);
             $sheet->setCellValue('E' . $row, $turno['fecha_finalizacion']);
-            $sheet->setCellValue('F' . $row, $turno['duracion_atencion']);
+            // duracion_atencion en segundos -> formato inteligente
+            $sheet->setCellValue('F' . $row, $this->formatearDuracionSegundos($turno['duracion_atencion']));
             $sheet->setCellValue('G' . $row, $turno['caja']);
             $row++;
         }
@@ -936,7 +989,7 @@ class ReportesController extends Controller
         // Encabezados
         $sheet->setCellValue('A1', 'Inicio');
         $sheet->setCellValue('B1', 'Fin');
-        $sheet->setCellValue('C1', 'Duración (min)');
+        $sheet->setCellValue('C1', 'Duración');
         $sheet->setCellValue('D1', 'Actividad Realizada');
 
         // Estilo encabezado
@@ -951,7 +1004,7 @@ class ReportesController extends Controller
         foreach ($datosAsesor['actividades_canal'] as $actividad) {
             $sheet->setCellValue('A' . $row, $actividad['inicio']);
             $sheet->setCellValue('B' . $row, $actividad['fin']);
-            $sheet->setCellValue('C' . $row, $actividad['duracion_minutos']);
+            $sheet->setCellValue('C' . $row, $this->formatearDuracionMinutos($actividad['duracion_minutos']));
             $sheet->setCellValue('D' . $row, $actividad['actividad']);
             $row++;
         }

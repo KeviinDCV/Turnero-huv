@@ -14,6 +14,11 @@ export default defineConfig({
         host: '0.0.0.0', // Escuchar en todas las interfaces de red
         port: 5173,
         strictPort: true,
+        // Permitir solicitudes desde cualquier origen (necesario cuando Laravel
+        // se sirve por una IP de LAN distinta a localhost, p.ej. 192.168.x.x:8001)
+        cors: {
+            origin: true,
+        },
         hmr: {
             host: 'localhost', // Cambiar por la IP de tu servidor si accedes desde otro PC
         },

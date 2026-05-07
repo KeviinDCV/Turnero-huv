@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Turnos - Hospital Universitario del Valle</title>
+@php
+    if (!function_exists('formatearDuracionSegundos')) {
+        function formatearDuracionSegundos($segundos) {
+            if ($segundos === null || $segundos === '' || !is_numeric($segundos)) return 'N/A';
+            $segundos = (int) round((float) $segundos);
+            if ($segundos <= 0) return '0s';
+            $dias = intdiv($segundos, 86400);
+            $resto = $segundos % 86400;
+            $horas = intdiv($resto, 3600);
+            $resto = $resto % 3600;
+            $minutos = intdiv($resto, 60);
+            $segs = $resto % 60;
+            $partes = [];
+            if ($dias > 0) $partes[] = $dias.'d';
+            if ($horas > 0) $partes[] = $horas.'h';
+            if ($minutos > 0) $partes[] = $minutos.'m';
+            if ($segs > 0 && $dias === 0) $partes[] = $segs.'s';
+            return implode(' ', $partes) ?: '0s';
+        }
+    }
+@endphp
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -211,7 +232,7 @@
         @if($estadisticas['resumen']['tiempo_promedio_atencion'])
             <div class="summary-item" style="margin-top: 10px;">
                 <div class="summary-label">Tiempo Promedio de Atención</div>
-                <div class="summary-value">{{ round($estadisticas['resumen']['tiempo_promedio_atencion'] / 60, 2) }} minutos</div>
+                <div class="summary-value">{{ formatearDuracionSegundos($estadisticas['resumen']['tiempo_promedio_atencion']) }}</div>
             </div>
         @endif
     </div>
@@ -228,7 +249,7 @@
                     <th class="text-center">Atendidos</th>
                     <th class="text-center">Pendientes</th>
                     <th class="text-center">Cancelados</th>
-                    <th class="text-center">Tiempo Promedio (min)</th>
+                    <th class="text-center">Tiempo Promedio</th>
                 </tr>
             </thead>
             <tbody>
@@ -240,7 +261,7 @@
                     <td class="text-center">{{ $datos['pendientes'] }}</td>
                     <td class="text-center">{{ $datos['cancelados'] }}</td>
                     <td class="text-center">
-                        {{ $datos['tiempo_promedio'] ? round($datos['tiempo_promedio'] / 60, 2) : 'N/A' }}
+                        {{ formatearDuracionSegundos($datos['tiempo_promedio']) }}
                     </td>
                 </tr>
                 @endforeach
@@ -259,7 +280,7 @@
                     <th>Asesor</th>
                     <th class="text-center">Total Turnos</th>
                     <th class="text-center">Turnos Atendidos</th>
-                    <th class="text-center">Tiempo Promedio (min)</th>
+                    <th class="text-center">Tiempo Promedio</th>
                 </tr>
             </thead>
             <tbody>
@@ -269,7 +290,7 @@
                     <td class="text-center">{{ $datos['total'] }}</td>
                     <td class="text-center">{{ $datos['atendidos'] }}</td>
                     <td class="text-center">
-                        {{ $datos['tiempo_promedio'] ? round($datos['tiempo_promedio'] / 60, 2) : 'N/A' }}
+                        {{ formatearDuracionSegundos($datos['tiempo_promedio_atencion']) }}
                     </td>
                 </tr>
                 @endforeach
@@ -291,7 +312,7 @@
                     <th>Estado</th>
                     <th>Prioridad</th>
                     <th>Fecha Creación</th>
-                    <th>Duración (min)</th>
+                    <th>Duración</th>
                 </tr>
             </thead>
             <tbody>
@@ -310,7 +331,7 @@
                     </td>
                     <td>{{ $turno->fecha_creacion ? \Carbon\Carbon::parse($turno->fecha_creacion)->format('d/m/Y H:i') : 'N/A' }}</td>
                     <td class="text-center">
-                        {{ $turno->duracion_atencion ? round($turno->duracion_atencion / 60, 2) : 'N/A' }}
+                        {{ formatearDuracionSegundos($turno->duracion_atencion) }}
                     </td>
                 </tr>
                 @endforeach
