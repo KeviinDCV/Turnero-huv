@@ -42,6 +42,7 @@
             --hospital-blue: #064b9e;
             --hospital-blue-hover: #053d7a;
             --hospital-blue-light: #e6f0ff;
+            --sidebar-collapsed-width: 5.25rem;
         }
 
         .bg-hospital-blue {
@@ -62,6 +63,24 @@
 
         .bg-hospital-blue-light {
             background-color: var(--hospital-blue-light);
+        }
+
+        .sidebar-shell {
+            background: linear-gradient(180deg, #064b9e 0%, #053d7a 58%, #042b59 100%);
+        }
+
+        .sidebar-section-title {
+            color: rgba(219, 234, 254, 0.72);
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        .sidebar-item-active {
+            background: rgba(255, 255, 255, 0.16);
+            box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.96), 0 8px 18px rgba(0, 0, 0, 0.12);
         }
 
         /* Animaciones suaves */
@@ -296,6 +315,10 @@
             left: 100%;
         }
 
+        body.sidebar-is-collapsed .sidebar-label {
+            pointer-events: none;
+        }
+
         /* Animación suave para el indicador activo */
         .active-indicator {
             animation: pulse 2s infinite;
@@ -516,10 +539,32 @@
             }
         }
 
+        @media (min-width: 768px) {
+            body.sidebar-is-collapsed .sidebar-responsive {
+                width: var(--sidebar-collapsed-width) !important;
+            }
+
+            body.sidebar-is-collapsed .header-responsive {
+                left: var(--sidebar-collapsed-width) !important;
+            }
+
+            body.sidebar-is-collapsed .main-content {
+                margin-left: var(--sidebar-collapsed-width) !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            body.sidebar-is-collapsed .sidebar-responsive {
+                width: 16rem !important;
+            }
+        }
+
         @yield('styles')
     </style>
 </head>
-<body class="min-h-screen bg-gray-100" x-data="{ sidebarOpen: false }">
+<body class="min-h-screen bg-gray-100"
+      x-data="{ sidebarOpen: false, sidebarCollapsed: window.innerWidth >= 768 && localStorage.getItem('huvSidebarCollapsed') === '1' }"
+      :class="sidebarCollapsed ? 'sidebar-is-collapsed' : ''">
     @include('components.admin.header')
 
     <div class="flex main-container">
