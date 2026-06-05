@@ -315,6 +315,32 @@
             left: 100%;
         }
 
+        /* ===================== PULIDO PROFESIONAL DEL SIDEBAR ===================== */
+        /* Colapso suave: animar el ancho/margen al alternar el modo compacto */
+        @media (min-width: 768px) {
+            .sidebar-responsive { transition: width 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
+            .header-responsive  { transition: left 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
+            .main-content       { transition: margin-left 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
+        }
+
+        /* Micro-interacción: desplazamiento sutil al pasar el cursor (excepto el activo) */
+        .sidebar-item:not(.sidebar-item-active):hover {
+            transform: translateX(2px);
+        }
+
+        /* Ícono del ítem: leve realce al pasar el cursor y sombra en el activo */
+        .sidebar-icon { transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease; }
+        .sidebar-item:hover .sidebar-icon { transform: scale(1.06); }
+        .sidebar-item-active .sidebar-icon { box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.28); }
+
+        /* Botón de colapsar: realce al pasar el cursor */
+        body.sidebar-is-collapsed .sidebar-header .flex.items-center.min-w-0 { justify-content: center; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar-responsive, .header-responsive, .main-content,
+            .sidebar-item, .sidebar-icon, .sidebar-item::before { transition: none !important; }
+        }
+
         body.sidebar-is-collapsed .sidebar-label {
             pointer-events: none;
         }

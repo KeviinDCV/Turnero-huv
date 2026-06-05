@@ -113,7 +113,7 @@
                             @endphp
 
                             <a href="{{ route($item['route']) }}"
-                               title="{{ $item['label'] }}"
+                               title="{{ $item['label'] }}{{ !empty($item['hint']) ? ' — '.$item['hint'] : '' }}"
                                class="sidebar-item group relative flex min-h-10 items-center rounded-lg transition-all duration-200 {{ $isActive ? 'sidebar-item-active text-white shadow-sm' : 'text-blue-100/80 hover:text-white hover:bg-white/[0.08]' }}"
                                :class="sidebarCollapsed ? 'justify-center px-2' : 'justify-start px-3'">
                                 <span class="sidebar-icon flex h-8 w-8 items-center justify-center rounded-lg flex-shrink-0 {{ $isActive ? 'bg-white text-hospital-blue' : 'bg-white/[0.08] text-blue-100/90 group-hover:bg-white/[0.14] group-hover:text-white' }} transition-colors">
