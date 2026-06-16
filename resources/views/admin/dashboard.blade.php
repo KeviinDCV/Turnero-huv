@@ -13,7 +13,7 @@
 @endphp
 
                 <div class="dashboard-container max-w-7xl mx-auto space-y-5">
-                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 md:p-5">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 md:p-5">
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-wide text-hospital-blue">Operación de hoy</p>
@@ -44,53 +44,56 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                        <div class="metric-card bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                             <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Usuarios activos</p>
-                                    <div id="metric-usuarios-activos" class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($usuariosActivosTotal) }}</div>
-                                    <p class="text-xs text-gray-500 mt-1"><span id="metric-usuarios-disponibles">{{ number_format($usuariosDisponibles) }}</span> disponibles · <span id="metric-usuarios-ocupados">{{ number_format($usuariosOcupados) }}</span> ocupados</p>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Usuarios activos</p>
+                                    <div id="metric-usuarios-activos" class="metric-value text-3xl font-bold mt-2">{{ number_format($usuariosActivosTotal) }}</div>
+                                    <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#22c55e;"></span>
+                                        <span><span id="metric-usuarios-disponibles">{{ number_format($usuariosDisponibles) }}</span> disponibles · <span id="metric-usuarios-ocupados">{{ number_format($usuariosOcupados) }}</span> ocupados</span>
+                                    </p>
                                 </div>
-                                <div class="w-10 h-10 rounded-lg bg-blue-50 text-hospital-blue flex items-center justify-center flex-shrink-0">
+                                <div class="metric-icon w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"></path></svg>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                        <div class="metric-card bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                             <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Atendidos hoy</p>
-                                    <div id="metric-turnos-atendidos" class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($turnosAtendidosTotal) }}</div>
-                                    <p class="text-xs text-gray-500 mt-1">Turnos terminados por servicio</p>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Atendidos hoy</p>
+                                    <div id="metric-turnos-atendidos" class="metric-value text-3xl font-bold mt-2">{{ number_format($turnosAtendidosTotal) }}</div>
+                                    <p class="text-xs text-gray-500 mt-1.5">Turnos terminados por servicio</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                                <div class="metric-icon w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                        <div class="metric-card bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                             <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Asesores con atención</p>
-                                    <div id="metric-asesores-atencion" class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($asesoresConAtencion) }}</div>
-                                    <p class="text-xs text-gray-500 mt-1">Con turnos terminados hoy</p>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Asesores con atención</p>
+                                    <div id="metric-asesores-atencion" class="metric-value text-3xl font-bold mt-2">{{ number_format($asesoresConAtencion) }}</div>
+                                    <p class="text-xs text-gray-500 mt-1.5">Con turnos terminados hoy</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center flex-shrink-0">
+                                <div class="metric-icon w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm6 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                        <div class="metric-card bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                             <div class="flex items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">Turnos en cola</p>
-                                    <div id="metric-turnos-cola" class="text-2xl font-bold text-gray-900 mt-2">{{ number_format($turnosEnColaTotal) }}</div>
-                                    <p class="text-xs text-gray-500 mt-1"><span id="metric-servicios-cola">{{ number_format($serviciosConCola) }}</span> servicios con espera</p>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Turnos en cola</p>
+                                    <div id="metric-turnos-cola" class="metric-value text-3xl font-bold mt-2">{{ number_format($turnosEnColaTotal) }}</div>
+                                    <p class="text-xs text-gray-500 mt-1.5"><span id="metric-servicios-cola">{{ number_format($serviciosConCola) }}</span> servicios con espera</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-700 flex items-center justify-center flex-shrink-0">
+                                <div class="metric-icon w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                             </div>
@@ -98,7 +101,7 @@
                     </div>
 
                     <!-- Usuarios Activos -->
-                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 overflow-x-auto">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-x-auto">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h2 class="dashboard-title text-lg font-semibold text-gray-800">Usuarios Activos</h2>
@@ -180,7 +183,7 @@
 
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                     <!-- Turnos por Servicio -->
-                    <div class="dashboard-section bg-white border border-gray-200 rounded-lg shadow-sm p-4 overflow-x-auto">
+                    <div class="dashboard-section bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-x-auto">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h2 class="dashboard-title text-lg font-semibold text-gray-800">Turnos Atendidos por Servicio (Hoy)</h2>
@@ -225,7 +228,7 @@
                     </div>
 
                     <!-- Turnos por Asesor -->
-                    <div class="dashboard-section bg-white border border-gray-200 rounded-lg shadow-sm p-4 overflow-x-auto">
+                    <div class="dashboard-section bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-x-auto">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h2 class="dashboard-title text-lg font-semibold text-gray-800">Turnos Atendidos por Asesor (Hoy)</h2>
@@ -270,7 +273,7 @@
                     </div>
 
                     <!-- Turnos en Cola por Servicio -->
-                    <div class="dashboard-section bg-white border border-gray-200 rounded-lg shadow-sm p-4 overflow-x-auto">
+                    <div class="dashboard-section bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-x-auto">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h2 class="dashboard-title text-lg font-semibold text-gray-800">Turnos en Cola por Servicio (Hoy)</h2>
@@ -1717,6 +1720,16 @@ button:hover,
     transform: translateY(-1px);
     transition: transform 0.1s ease;
 }
+
+/* ===== Refresco visual del dashboard ===== */
+/* Chips de ícono de las métricas: azul institucional (todas iguales) */
+.metric-icon { background: #e6f1fb; color: #064b9e; }
+.metric-value { color: #0f2547; }
+.metric-card { transition: box-shadow .2s ease, border-color .2s ease; }
+.metric-card:hover { border-color: #cdd9ec; box-shadow: 0 6px 18px -10px rgba(16, 24, 40, .18); }
+/* Encabezado de tablas: tinte sobrio en lugar de gris plano */
+.dashboard-table thead tr { background: #f6f8fc; }
+.dashboard-table th { color: #5f6b80; }
 </style>
 
 @endsection
