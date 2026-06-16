@@ -65,45 +65,58 @@
             background-color: var(--hospital-blue-light);
         }
 
+        /* ===== Sidebar "Marca profunda" (azul profundo + pestaña conectada) ===== */
         .sidebar-shell {
-            background: linear-gradient(180deg, #064b9e 0%, #053d7a 58%, #042b59 100%);
+            background: #072449;
         }
 
         .sidebar-section-title {
-            color: rgba(219, 234, 254, 0.72);
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
+            color: #7e9bc4;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
             line-height: 1.4;
-            text-transform: uppercase;
         }
 
-        .sidebar-item-active {
-            background: rgba(255, 255, 255, 0.16);
-            box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.96), 0 8px 18px rgba(0, 0, 0, 0.12);
+        /* Sin brillo de barrido en este diseño */
+        .sidebar-item::before { display: none !important; }
+
+        /* Ítems: pestaña que llega al borde derecho y se "conecta" con el contenido */
+        .sidebar-item {
+            color: #bccce4;
+            margin-left: 12px;
+            border-radius: 10px 0 0 10px;
         }
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+        .sidebar-item-active,
+        .sidebar-item-active:hover {
+            background: #ffffff;
+            color: #072449;
+        }
+
+        .sidebar-logout { color: #bccce4; border-radius: 10px; }
+        .sidebar-logout:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
 
         /* Animaciones suaves */
         .transition-all {
             transition: all 0.3s ease;
         }
 
-        /* Mejora del scroll en la sidebar */
-        .sidebar-nav::-webkit-scrollbar {
-            width: 4px;
+        /* Menú desplazable SIN barra visible (la barra translúcida se veía como
+           una línea azul sobre el navy). El contenido sigue desplazándose con rueda/touch. */
+        .sidebar-nav,
+        .sidebar-full-height {
+            scrollbar-width: none;          /* Firefox */
+            -ms-overflow-style: none;       /* IE/Edge antiguo */
         }
-
-        .sidebar-nav::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .sidebar-nav::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.3);
-            border-radius: 2px;
-        }
-
-        .sidebar-nav::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.5);
+        .sidebar-nav::-webkit-scrollbar,
+        .sidebar-full-height::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;                  /* Chrome/Safari/Edge */
         }
 
         .modal-overlay {
