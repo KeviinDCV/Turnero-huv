@@ -160,7 +160,7 @@
                             <p class="text-xs font-semibold uppercase tracking-wide text-hospital-blue">Pantallas</p>
                             <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">Configuración del TV</h1>
                         </div>
-                        <a href="{{ route('tv.display') }}" target="_blank" class="bg-hospital-blue text-white px-4 py-2 rounded-lgcursor-pointer w-full sm:w-auto flex items-center justify-center focus:outline-none">
+                        <a href="{{ route('tv.display') }}" target="_blank" class="bg-hospital-blue text-white px-4 py-2 rounded-lg cursor-pointer w-full sm:w-auto flex items-center justify-center focus:outline-none">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                             </svg>
@@ -250,7 +250,7 @@
                             <button
                                 type="submit"
                                 id="submitBtn"
-                                class="bg-hospital-blue text-white px-4 py-2 rounded-lgdisabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                                class="bg-hospital-blue text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
                             >
                                 <span id="submitText">Guardar Configuración</span>
                                 <span id="loadingText" class="hidden">Guardando...</span>
@@ -264,7 +264,7 @@
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-lg font-semibold text-gray-800">Gestión de Multimedia</h2>
                             @if($multimedia->count() > 0)
-                            <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded-lgcursor-pointer flex items-center focus:outline-none">
+                            <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded-lg cursor-pointer flex items-center focus:outline-none">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
@@ -334,7 +334,7 @@
                                     <h3 class="mt-2 text-sm font-medium text-gray-900">No hay archivos multimedia</h3>
                                     <p class="mt-1 text-sm text-gray-500">Comience subiendo imágenes o videos para mostrar en el TV.</p>
                                     <div class="mt-6">
-                                        <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded-lgcursor-pointer flex items-center mx-auto focus:outline-none">
+                                        <button onclick="showUploadModal()" class="bg-hospital-blue text-white px-4 py-2 rounded-lg cursor-pointer flex items-center mx-auto focus:outline-none">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                             </svg>
@@ -351,7 +351,7 @@
 @section('scripts')
     <!-- Modal de éxito -->
     <div id="successModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
                     <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
@@ -366,7 +366,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-center">
-                    <button onclick="closeSuccessModal()" class="bg-hospital-blue text-white px-4 py-2 rounded-lgcursor-pointer focus:outline-none">
+                    <button onclick="closeSuccessModal()" class="bg-hospital-blue text-white px-4 py-2 rounded-lg cursor-pointer focus:outline-none">
                         Aceptar
                     </button>
                 </div>
@@ -1075,7 +1075,7 @@
     <!-- Modales -->
     <!-- Modal de subida de archivos -->
     <div id="uploadModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
                     <h3 class="text-lg font-medium text-center text-gray-900">Subir Archivo Multimedia</h3>
@@ -1148,7 +1148,7 @@
 
     <!-- Modal de confirmación de eliminación -->
     <div id="deleteModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
                     <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
@@ -1177,7 +1177,7 @@
 
     <!-- Modal de éxito de eliminación -->
     <div id="deleteSuccessModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
                     <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full">
@@ -1202,7 +1202,7 @@
 
     <!-- Modal de error de eliminación -->
     <div id="deleteErrorModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
                     <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
@@ -1227,7 +1227,7 @@
 
     <!-- Modal de error de archivo -->
     <div id="fileErrorModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <div class="mb-4">
                     <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
