@@ -14,10 +14,10 @@
         <div class="flex flex-col sm:flex-row gap-2">
             <!-- Selector de Fechas -->
             <div class="flex flex-col sm:flex-row gap-2 items-center">
-                <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Fecha:</label>
+                <label for="fechaSelector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Fecha:</label>
                 <input type="date" id="fechaSelector" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent" value="{{ date('Y-m-d') }}">
 
-                <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Rango:</label>
+                <label for="rangoSelector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Rango:</label>
                 <select id="rangoSelector" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hospital-blue focus:border-transparent">
                     <option value="dia" selected>Día</option>
                     <option value="semana">Semana</option>
@@ -45,8 +45,8 @@
     <!-- Tab Navigation -->
     <div class="mb-6">
         <div class="border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
-                <button id="tab-actual" onclick="cambiarTab('actual')" class="tab-button active whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+            <nav class="-mb-px flex space-x-8" role="tablist">
+                <button id="tab-actual" onclick="cambiarTab('actual')" role="tab" aria-controls="content-actual" aria-selected="true" class="tab-button active whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -54,7 +54,7 @@
                         Datos Actuales
                     </div>
                 </button>
-                <button id="tab-historico" onclick="cambiarTab('historico')" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                <button id="tab-historico" onclick="cambiarTab('historico')" role="tab" aria-controls="content-historico" aria-selected="false" class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -70,7 +70,7 @@
     <div id="tab-content">
 
     <!-- DATOS ACTUALES TAB -->
-    <div id="content-actual" class="tab-content active">
+    <div id="content-actual" role="tabpanel" class="tab-content active">
 
     <!-- Estadísticas Generales -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8" id="estadisticas-generales">
@@ -91,7 +91,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="turnosPorEstadoChart"></canvas>
+                <canvas id="turnosPorEstadoChart" role="img" aria-label="Gráfico: Turnos por Estado (Hoy)"></canvas>
             </div>
         </div>
 
@@ -106,7 +106,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="distribucionPrioridadesChart"></canvas>
+                <canvas id="distribucionPrioridadesChart" role="img" aria-label="Gráfico: Distribución de Prioridades (Hoy)"></canvas>
             </div>
         </div>
 
@@ -121,7 +121,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="turnosPorHoraChart"></canvas>
+                <canvas id="turnosPorHoraChart" role="img" aria-label="Gráfico: Turnos por Hora del Día (Hoy)"></canvas>
             </div>
         </div>
 
@@ -136,7 +136,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="turnosPorServicioChart"></canvas>
+                <canvas id="turnosPorServicioChart" role="img" aria-label="Gráfico: Turnos por Servicio (Hoy)"></canvas>
             </div>
         </div>
 
@@ -151,7 +151,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="rendimientoAsesoresChart"></canvas>
+                <canvas id="rendimientoAsesoresChart" role="img" aria-label="Gráfico: Top Asesores (Hoy)"></canvas>
             </div>
         </div>
 
@@ -166,7 +166,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="tiempoAtencionChart"></canvas>
+                <canvas id="tiempoAtencionChart" role="img" aria-label="Gráfico: Tiempo Promedio de Atención por Servicio (min)"></canvas>
             </div>
         </div>
 
@@ -181,7 +181,7 @@
                 </button>
             </div>
             <div class="relative h-64">
-                <canvas id="turnosPorDiaChart"></canvas>
+                <canvas id="turnosPorDiaChart" role="img" aria-label="Gráfico: Distribución de Turnos por Hora (Hoy)"></canvas>
             </div>
         </div>
 
@@ -190,7 +190,7 @@
     </div> <!-- End content-actual -->
 
     <!-- DATOS HISTÓRICOS TAB -->
-    <div id="content-historico" class="tab-content hidden">
+    <div id="content-historico" role="tabpanel" class="tab-content hidden">
 
         <!-- Filtros Avanzados Históricos -->
         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-6">
@@ -343,7 +343,7 @@
                     </div>
                 </div>
                 <div class="relative h-64">
-                    <canvas id="volumenChartHistorico"></canvas>
+                    <canvas id="volumenChartHistorico" role="img" aria-label="Gráfico: Evolución de Turnos Histórica"></canvas>
                 </div>
             </div>
 
@@ -358,7 +358,7 @@
                     </button>
                 </div>
                 <div class="relative h-64">
-                    <canvas id="serviciosChartHistorico"></canvas>
+                    <canvas id="serviciosChartHistorico" role="img" aria-label="Gráfico: Distribución por Servicios"></canvas>
                 </div>
             </div>
 
@@ -373,7 +373,7 @@
                     </button>
                 </div>
                 <div class="relative h-64">
-                    <canvas id="estadosChartHistorico"></canvas>
+                    <canvas id="estadosChartHistorico" role="img" aria-label="Gráfico: Estados Finales"></canvas>
                 </div>
             </div>
 
@@ -388,7 +388,7 @@
                     </button>
                 </div>
                 <div class="relative h-64">
-                    <canvas id="horasPicoChartHistorico"></canvas>
+                    <canvas id="horasPicoChartHistorico" role="img" aria-label="Gráfico: Análisis de Horas Pico"></canvas>
                 </div>
             </div>
 
@@ -403,7 +403,7 @@
                     </button>
                 </div>
                 <div class="relative h-64">
-                    <canvas id="tiempoAtencionChartHistorico"></canvas>
+                    <canvas id="tiempoAtencionChartHistorico" role="img" aria-label="Gráfico: Tiempo Promedio de Atención"></canvas>
                 </div>
             </div>
 
@@ -418,7 +418,7 @@
                     </button>
                 </div>
                 <div class="relative h-64">
-                    <canvas id="asesoresChartHistorico"></canvas>
+                    <canvas id="asesoresChartHistorico" role="img" aria-label="Gráfico: Top Asesores"></canvas>
                 </div>
             </div>
 
@@ -498,8 +498,10 @@ function cambiarTab(tab) {
     // Actualizar botones de tab
     document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
     });
     document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById(`tab-${tab}`).setAttribute('aria-selected', 'true');
 
     // Mostrar/ocultar contenido
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -1637,7 +1639,7 @@ function exportarDashboardHistorico() {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div role="dialog" aria-modal="true" class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Exportar Dashboard Histórico</h3>
             <div class="space-y-4">
                 <div>
@@ -1754,6 +1756,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Actualizar automáticamente cada 5 minutos solo si está en el día actual y en tab actual
     setInterval(function() {
+        if (document.hidden) return;
         if (currentTab === 'actual') {
             const fechaSeleccionada = document.getElementById('fechaSelector').value;
             const hoy = new Date().toISOString().split('T')[0];

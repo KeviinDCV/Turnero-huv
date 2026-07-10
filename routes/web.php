@@ -285,8 +285,3 @@ Route::middleware(['no.session.api'])->group(function () {
     // API para obtener estado de un turno específico
     Route::get('/api/turno-status/{turno}', [TvConfigController::class, 'getTurnoStatus'])->name('api.turno-status');
 });
-
-// Ruta para el visualizador del atril
-Route::get('/atril', function () {
-    return view('atril.index');
-})->name('atril.index');

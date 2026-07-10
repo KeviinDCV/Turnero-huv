@@ -112,18 +112,21 @@
                         <table class="dashboard-table w-full divide-y divide-gray-200" id="usuarios-activos-table">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-600">
-                                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Usuario</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Rol</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Disponibilidad</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Estado</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Actividad</th>
+                                    <th scope="col" class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Usuario</th>
+                                    <th scope="col" class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Rol</th>
+                                    <th scope="col" class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Disponibilidad</th>
+                                    <th scope="col" class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Estado</th>
+                                    <th scope="col" class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wide">Actividad</th>
                                 </tr>
                             </thead>
                             <tbody id="usuarios-activos-container" class="divide-y divide-gray-200 bg-white">
                                 @if($usuariosActivos->count() > 0)
                                     @foreach($usuariosActivos as $usuario)
-                                        <tr class="hover:bg-blue-50/70 cursor-pointer transition-colors" 
-                                            onclick="abrirModalEstadisticas({{ $usuario['id'] }}, '{{ addslashes($usuario['name']) }}')"
+                                        <tr class="hover:bg-blue-50/70 cursor-pointer transition-colors"
+                                            role="button" tabindex="0"
+                                            onclick="abrirModalEstadisticas({{ $usuario['id'] }}, @js($usuario['name']))"
+                                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModalEstadisticas({{ $usuario['id'] }}, @js($usuario['name']));}"
+                                            aria-label="Ver estadísticas de {{ $usuario['name'] }}"
                                             title="Clic para ver estadísticas de {{ $usuario['name'] }}">
                                             <td class="py-3 px-4 whitespace-nowrap">
                                                 <div class="flex flex-col">
@@ -321,7 +324,7 @@
                 </div>
 
 <!-- Modal de opciones para limpiar sesiones -->
-<div id="cleanSessionsModal" class="fixed inset-0 modal-overlay hidden z-50">
+<div id="cleanSessionsModal" role="dialog" aria-modal="true" aria-labelledby="cleanSessionsTitle" class="fixed inset-0 modal-overlay hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6">
@@ -332,7 +335,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">Opciones de Limpieza de Sesiones</h3>
+                        <h3 id="cleanSessionsTitle" class="text-lg font-medium text-gray-900">Opciones de Limpieza de Sesiones</h3>
                         <p class="text-sm text-gray-500">Selecciona cómo deseas limpiar las sesiones</p>
                     </div>
                 </div>
@@ -421,7 +424,7 @@
 </div>
 
 <!-- Modal de opciones para emergencia de turnos -->
-<div id="emergencyTurnosModal" class="fixed inset-0 modal-overlay hidden z-50">
+<div id="emergencyTurnosModal" role="dialog" aria-modal="true" aria-labelledby="emergencyTurnosTitle" class="fixed inset-0 modal-overlay hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6">
@@ -432,7 +435,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium text-gray-900">Emergencia - Gestión de Turnos</h3>
+                        <h3 id="emergencyTurnosTitle" class="text-lg font-medium text-gray-900">Emergencia - Gestión de Turnos</h3>
                         <p class="text-sm text-gray-500">Opciones de emergencia para reestablecer o eliminar turnos del sistema</p>
                     </div>
                 </div>
@@ -543,6 +546,7 @@
     >
         <div
             @click.away="isOpen = false"
+            role="dialog" aria-modal="true" aria-labelledby="estadisticasTitle"
             class="bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-y-auto max-h-[90vh]"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 transform scale-95"
@@ -553,9 +557,9 @@
         >
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-800">Estadísticas del Usuario</h2>
-                    <button @click="isOpen = false" class="text-gray-500 hover:text-gray-700 cursor-pointer">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <h2 id="estadisticasTitle" class="text-xl font-bold text-gray-800">Estadísticas del Usuario</h2>
+                    <button @click="isOpen = false" type="button" aria-label="Cerrar" class="text-gray-500 hover:text-gray-700 cursor-pointer">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -619,7 +623,7 @@
 </div>
 
 <!-- Modal de resultado -->
-<div id="resultModal" class="fixed inset-0 modal-overlay hidden z-50">
+<div id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle" class="fixed inset-0 modal-overlay hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div class="p-6">
@@ -650,6 +654,18 @@
 <script>
 let selectedCleanOption = null;
 let selectedUserId = null;
+
+// Cerrar con Escape los modales de sesiones/emergencia/resultado (accesibilidad de teclado)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        ['cleanSessionsModal', 'emergencyTurnosModal', 'resultModal'].forEach(function(id) {
+            const m = document.getElementById(id);
+            if (m && !m.classList.contains('hidden')) {
+                m.classList.add('hidden');
+            }
+        });
+    }
+});
 
 function showCleanSessionsOptions() {
     document.getElementById('cleanSessionsModal').classList.remove('hidden');
@@ -995,8 +1011,11 @@ function actualizarUsuariosActivos() {
                     const nombreEscapado = usuario.name.replace(/'/g, "\\'").replace(/"/g, '\\"');
                     
                     html += `
-                        <tr class="hover:bg-blue-50/70 cursor-pointer transition-colors" 
+                        <tr class="hover:bg-blue-50/70 cursor-pointer transition-colors"
+                            role="button" tabindex="0"
                             onclick="abrirModalEstadisticas(${usuario.id}, '${nombreEscapado}')"
+                            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModalEstadisticas(${usuario.id}, '${nombreEscapado}');}"
+                            aria-label="Ver estadísticas de ${usuario.name}"
                             title="Clic para ver estadísticas de ${usuario.name}">
                             <td class="py-3 px-4 whitespace-nowrap">
                                 <div class="flex flex-col">
@@ -1226,6 +1245,7 @@ function actualizarTurnosEnCola() {
 // Función para iniciar la actualización automática
 function startAutoUpdate() {
     autoUpdateInterval = setInterval(() => {
+        if (document.hidden) return; // no refrescar en segundo plano (ahorra red/CPU)
         actualizarUsuariosActivos();
         actualizarTurnosPorServicio();
         actualizarTurnosPorAsesor();

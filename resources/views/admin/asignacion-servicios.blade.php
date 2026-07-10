@@ -86,7 +86,11 @@
                             <div class="space-y-2">
                                 <template x-for="servicio in serviciosDisponibles" :key="servicio.id">
                                     <div class="service-item p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-hospital-blue hover:bg-blue-50"
-                                         @click="asignarServicio(servicio.id)">
+                                         role="button" tabindex="0"
+                                         :aria-label="'Asignar servicio ' + servicio.nombre"
+                                         @click="asignarServicio(servicio.id)"
+                                         @keydown.enter="asignarServicio(servicio.id)"
+                                         @keydown.space.prevent="asignarServicio(servicio.id)">
                                         <div class="flex items-center justify-between">
                                             <div class="flex-1">
                                                 <h4 class="font-medium text-gray-900" x-text="servicio.nombre"></h4>
@@ -127,7 +131,11 @@
                             <div class="space-y-2">
                                 <template x-for="servicio in serviciosAsignados" :key="servicio.id">
                                     <div class="service-item p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-red-400 hover:bg-red-50"
-                                         @click="desasignarServicio(servicio.id)">
+                                         role="button" tabindex="0"
+                                         :aria-label="'Quitar servicio ' + servicio.nombre"
+                                         @click="desasignarServicio(servicio.id)"
+                                         @keydown.enter="desasignarServicio(servicio.id)"
+                                         @keydown.space.prevent="desasignarServicio(servicio.id)">
                                         <div class="flex items-center justify-between">
                                             <div class="flex-1">
                                                 <h4 class="font-medium text-gray-900" x-text="servicio.nombre"></h4>

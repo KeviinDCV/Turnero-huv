@@ -459,6 +459,7 @@
                     <input
                         type="text"
                         id="codigo-turno"
+                        aria-label="Código del turno"
                         placeholder="CÓDIGO"
                         class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         maxlength="3"
@@ -468,6 +469,7 @@
                     <input
                         type="number"
                         id="numero-turno"
+                        aria-label="Número del turno"
                         placeholder="NÚMERO"
                         class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min="1"
@@ -518,10 +520,12 @@
                         <div class="grid-item p-3 border-r border-gray-200 text-center transition-count" data-pendientes="{{ $servicio['pendientes'] }}">
                             {{ $servicio['pendientes'] }}
                         </div>
-                            <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50" 
+                            <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50"
+                                 role="button" tabindex="0"
                                  data-aplazados="{{ $servicio['aplazados'] }}"
                                  data-servicio-id="{{ $servicio['id'] }}"
                                  onclick="abrirModalAplazados({{ $servicio['id'] }}, '{{ $servicio['nombre'] }}', {{ $servicio['aplazados'] }})"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModalAplazados({{ $servicio['id'] }}, '{{ $servicio['nombre'] }}', {{ $servicio['aplazados'] }})}"
                                  style="{{ $servicio['aplazados'] > 0 ? 'cursor: pointer; font-weight: bold; color: #f97316;' : '' }}">
                                 {{ $servicio['aplazados'] }}
                             </div>
@@ -545,10 +549,12 @@
                                     {{ $subservicio['nombre'] }}
                                 </div>
                                 <div class="grid-item p-3 border-r border-gray-200 text-center transition-count" data-pendientes="{{ $subservicio['pendientes'] }}">{{ $subservicio['pendientes'] }}</div>
-                                <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50" 
+                                <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50"
+                                     role="button" tabindex="0"
                                      data-aplazados="{{ $subservicio['aplazados'] }}"
                                      data-servicio-id="{{ $subservicio['id'] }}"
                                      onclick="abrirModalAplazados({{ $subservicio['id'] }}, '{{ $subservicio['nombre'] }}', {{ $subservicio['aplazados'] }})"
+                                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModalAplazados({{ $subservicio['id'] }}, '{{ $subservicio['nombre'] }}', {{ $subservicio['aplazados'] }})}"
                                      style="{{ $subservicio['aplazados'] > 0 ? 'cursor: pointer; font-weight: bold; color: #f97316;' : '' }}">
                                     {{ $subservicio['aplazados'] }}
                                 </div>
@@ -612,8 +618,10 @@
 
                 <!-- Centro -->
                 <div class="flex-1 flex flex-col justify-center items-center">
-                    <div class="turno-display text-6xl font-light mb-8 tracking-wider" id="turno-actual">TURNO</div>
-                    <div class="servicio-display text-4xl font-light tracking-wider" id="servicio-actual">SERVICIO</div>
+                    <div role="status" aria-live="assertive" aria-atomic="true">
+                        <div class="turno-display text-6xl font-light mb-8 tracking-wider" id="turno-actual">TURNO</div>
+                        <div class="servicio-display text-4xl font-light tracking-wider" id="servicio-actual">SERVICIO</div>
+                    </div>
                 </div>
 
                 <!-- Botones de acción -->
@@ -636,7 +644,7 @@
 
                 <!-- Footer -->
                 <div class="p-6">
-                    <div class="flex items-center mb-4 opacity-80 cursor-pointer" onclick="window.location.href='{{ route('asesor.cambiar-caja') }}'">
+                    <div class="flex items-center mb-4 opacity-80 cursor-pointer" role="button" tabindex="0" onclick="window.location.href='{{ route('asesor.cambiar-caja') }}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{{ route('asesor.cambiar-caja') }}'}">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
@@ -658,7 +666,7 @@
     </div>
 
     <!-- Modal para notificaciones -->
-    <div id="notification-modal" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
+    <div id="notification-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl animate-fade-in">
             <div class="text-center">
                 <div id="modal-icon" class="mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center">
@@ -679,13 +687,13 @@
     </div>
 
     <!-- Modal para Canal No Presencial -->
-    <div id="canal-no-presencial-modal" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
+    <div id="canal-no-presencial-modal" role="dialog" aria-modal="true" aria-labelledby="canal-no-presencial-modal-title" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg mx-4 animate-fade-in">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Canales no presenciales</h3>
-                    <button id="btn-cerrar-canal-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <h3 id="canal-no-presencial-modal-title" class="text-xl font-bold text-gray-900">Canales no presenciales</h3>
+                    <button id="btn-cerrar-canal-modal" aria-label="Cerrar" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -693,8 +701,9 @@
 
                 <p class="text-sm text-gray-600 mb-4">Describe la actividad que estás realizando en canales no presenciales:</p>
 
-                <textarea 
+                <textarea
                     id="actividad-canal-input"
+                    aria-label="Descripción de la actividad"
                     rows="4"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Ejemplo: Atendiendo solicitudes por correo electrónico, respondiendo consultas por WhatsApp..."
@@ -721,13 +730,13 @@
     </div>
 
     <!-- Modal para Turnos Aplazados -->
-    <div id="modal-aplazados" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
+    <div id="modal-aplazados" role="dialog" aria-modal="true" aria-labelledby="modal-aplazados-title" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4 animate-fade-in max-h-[80vh] flex flex-col">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-bold text-gray-900">Turnos Aplazados</h3>
-                    <button id="btn-cerrar-modal-aplazados" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <h3 id="modal-aplazados-title" class="text-xl font-bold text-gray-900">Turnos Aplazados</h3>
+                    <button id="btn-cerrar-modal-aplazados" aria-label="Cerrar" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
@@ -762,7 +771,7 @@
     </div>
 
     <!-- Modal de Confirmación para Finalizar Canal No Presencial -->
-    <div id="confirmar-finalizar-modal" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
+    <div id="confirmar-finalizar-modal" role="dialog" aria-modal="true" aria-labelledby="confirmar-finalizar-modal-title" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 animate-fade-in">
             <div class="p-6">
                 <div class="flex items-center mb-4">
@@ -772,7 +781,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-bold text-gray-900">Confirmar Finalización</h3>
+                        <h3 id="confirmar-finalizar-modal-title" class="text-lg font-bold text-gray-900">Confirmar Finalización</h3>
                     </div>
                 </div>
 
@@ -957,6 +966,7 @@
 
         // Función para actualizar las estadísticas de servicios
         function actualizarEstadisticasServicios() {
+            if (document.hidden) return;
             fetch('{{ route("api.asesor.servicios-estadisticas") }}')
                 .then(response => response.json())
                 .then(servicios => {
@@ -997,10 +1007,12 @@
                             <div class="grid-item p-3 border-r border-gray-200 text-center transition-count" data-pendientes="${servicio.pendientes}">
                                 ${servicio.pendientes}
                             </div>
-                            <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50" 
+                            <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50"
+                                 role="button" tabindex="0"
                                  data-aplazados="${servicio.aplazados}"
                                  data-servicio-id="${servicio.id}"
                                  onclick="abrirModalAplazados(${servicio.id}, '${servicio.nombre.replace(/'/g, "\\'")}', ${servicio.aplazados})"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModalAplazados(${servicio.id}, '${servicio.nombre.replace(/'/g, "\\'")}', ${servicio.aplazados})}"
                                  style="${servicio.aplazados > 0 ? 'cursor: pointer; font-weight: bold; color: #f97316;' : ''}">
                                 ${servicio.aplazados}
                             </div>
@@ -1031,10 +1043,12 @@
                                         ${subservicio.nombre}
                                     </div>
                                     <div class="grid-item p-3 border-r border-gray-200 text-center transition-count" data-pendientes="${subservicio.pendientes}">${subservicio.pendientes}</div>
-                                    <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50" 
+                                    <div class="grid-item p-3 border-r border-gray-200 text-center transition-count cursor-pointer hover:bg-blue-50"
+                                         role="button" tabindex="0"
                                          data-aplazados="${subservicio.aplazados}"
                                          data-servicio-id="${subservicio.id}"
                                          onclick="abrirModalAplazados(${subservicio.id}, '${subservicio.nombre.replace(/'/g, "\\'")}', ${subservicio.aplazados})"
+                                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirModalAplazados(${subservicio.id}, '${subservicio.nombre.replace(/'/g, "\\'")}', ${subservicio.aplazados})}"
                                          style="${subservicio.aplazados > 0 ? 'cursor: pointer; font-weight: bold; color: #f97316;' : ''}">
                                         ${subservicio.aplazados}
                                     </div>
@@ -1315,6 +1329,7 @@
 
         // Cargar historial de turnos llamados
         function cargarHistorialTurnos() {
+            if (document.hidden) return;
             console.log('🔄 Cargando historial de turnos...');
 
             fetch('/asesor/historial-turnos')
@@ -1865,6 +1880,18 @@
             if (e.target === modalAplazados) {
                 cerrarModalAplazados();
             }
+        });
+
+        // Cerrar con la tecla Escape el modal que esté visible
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+            ['notification-modal', 'canal-no-presencial-modal', 'modal-aplazados', 'confirmar-finalizar-modal'].forEach(function(id) {
+                const modalEl = document.getElementById(id);
+                if (modalEl && !modalEl.classList.contains('hidden')) {
+                    modalEl.classList.remove('flex');
+                    modalEl.classList.add('hidden');
+                }
+            });
         });
 
         // Función para verificar si hay un turno en proceso al cargar la página

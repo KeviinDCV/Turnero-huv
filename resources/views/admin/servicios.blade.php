@@ -16,6 +16,9 @@
 
                         <!-- Modal Crear Servicio -->
                         <div x-show="openModal"
+                             role="dialog"
+                             aria-modal="true"
+                             @keydown.escape.window="openModal = false"
                              x-transition:enter="transition ease-out duration-300"
                              x-transition:enter-start="opacity-0"
                              x-transition:enter-end="opacity-100"
@@ -202,6 +205,7 @@
                                 <input
                                     type="text"
                                     x-model="search"
+                                    aria-label="Buscar servicios"
                                     placeholder="Buscar por nombre, código, nivel, estado o descripción..."
                                     class="w-full px-4 py-2 focus:outline-none focus:border-hospital-blue"
                                 >
@@ -221,11 +225,11 @@
                                 <table class="w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr class="bg-[#f6f8fc] text-gray-500 border-b border-gray-200">
-                                        <th class="py-3 px-4 text-left font-semibold">SERVICIO</th>
-                                        <th class="py-3 px-4 text-left font-semibold">NIVEL</th>
-                                        <th class="py-3 px-4 text-left font-semibold hidden md:table-cell">CÓDIGO</th>
-                                        <th class="py-3 px-4 text-left font-semibold hidden lg:table-cell">ESTADO</th>
-                                        <th class="py-3 px-4 text-center font-semibold">OPCIONES</th>
+                                        <th scope="col" class="py-3 px-4 text-left font-semibold">SERVICIO</th>
+                                        <th scope="col" class="py-3 px-4 text-left font-semibold">NIVEL</th>
+                                        <th scope="col" class="py-3 px-4 text-left font-semibold hidden md:table-cell">CÓDIGO</th>
+                                        <th scope="col" class="py-3 px-4 text-left font-semibold hidden lg:table-cell">ESTADO</th>
+                                        <th scope="col" class="py-3 px-4 text-center font-semibold">OPCIONES</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -697,12 +701,6 @@
             const formData = new FormData(this);
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Debug: mostrar los datos que se van a enviar
-            console.log('Datos del formulario:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
-
             try {
                 const response = await fetch(this.action, {
                     method: 'POST',
@@ -712,9 +710,6 @@
                     },
                     body: formData
                 });
-
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
 
                 if (!response.ok) {
                     const errorText = await response.text();

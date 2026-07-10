@@ -47,7 +47,20 @@ LimitRequestBody 629145600
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+
+    # X-XSS-Protection es un encabezado OBSOLETO (los navegadores modernos lo ignoran y
+    # en algunos casos introduce vulnerabilidades). Se elimina de forma intencional.
+
+    # Content-Security-Policy: LISTO PARA ACTIVAR tras probar en el despliegue real.
+    # La app usa scripts/estilos en línea (Blade <script>/<style>, onclick, Alpine),
+    # Google Fonts y Chart.js por CDN, por eso necesita 'unsafe-inline'/'unsafe-eval'.
+    # Si se habilita broadcasting (Pusher u otro), añadir su host a connect-src antes de activar.
+    # Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+    # HSTS (Strict-Transport-Security) NO se añade: la app se sirve sobre HTTP en la red
+    # interna. Activar únicamente cuando TODO el tráfico sea HTTPS.
 </IfModule>
 
 # Compresión GZIP para mejor rendimiento
@@ -61,4 +74,15 @@ LimitRequestBody 629145600
     AddOutputFilterByType DEFLATE application/rss+xml
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Cache de larga duración para assets estáticos.
+# Los assets de Vite (public/build/assets) llevan hash en el nombre, por lo que son
+# inmutables: cambiar el contenido cambia el nombre. Las imágenes/fuentes de marca
+# también son estáticas. Un despliegue nuevo genera nombres nuevos, así que no hay
+# riesgo de servir versiones viejas.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|mjs|woff2?|ttf|otf|eot|svg|png|jpe?g|gif|ico|webp|avif)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
 </IfModule>

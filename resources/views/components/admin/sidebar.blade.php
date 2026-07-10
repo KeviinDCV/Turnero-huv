@@ -48,7 +48,7 @@
     ];
 @endphp
 
-<aside class="sidebar-responsive sidebar-shell text-white flex flex-col sidebar-full-height fixed inset-y-0 left-0 z-30 transform md:transform-none transition-transform duration-200 ease-out md:transition-none"
+<aside id="admin-sidebar" aria-label="Menú lateral" class="sidebar-responsive sidebar-shell text-white flex flex-col sidebar-full-height fixed inset-y-0 left-0 z-30 transform md:transform-none transition-transform duration-200 ease-out md:transition-none"
        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
 
     <!-- Encabezado -->
@@ -66,16 +66,17 @@
 
             <button type="button"
                     @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('huvSidebarCollapsed', sidebarCollapsed ? '1' : '0')"
+                    :aria-expanded="!sidebarCollapsed" aria-label="Alternar menú compacto"
                     class="hidden md:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors flex-shrink-0"
                     style="color: #9db8dd;" onmouseover="this.style.background='rgba(255,255,255,.1)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#9db8dd'"
                     title="Alternar menú compacto">
-                <svg class="h-4 w-4 transition-transform duration-200" :class="sidebarCollapsed ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-4 w-4 transition-transform duration-200" :class="sidebarCollapsed ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
 
-            <button type="button" @click="sidebarOpen = false" class="md:hidden h-9 w-9 inline-flex items-center justify-center rounded-lg text-white transition-colors flex-shrink-0" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='transparent'" title="Cerrar menú">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" @click="sidebarOpen = false" aria-label="Cerrar menú" class="md:hidden h-9 w-9 inline-flex items-center justify-center rounded-lg text-white transition-colors flex-shrink-0" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='transparent'" title="Cerrar menú">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
@@ -100,7 +101,7 @@
 
     <!-- Navegación -->
     <div class="flex-1 overflow-y-auto sidebar-nav">
-        <nav class="pl-3 py-3 space-y-4 pb-6">
+        <nav aria-label="Navegación principal" class="pl-3 py-3 space-y-4 pb-6">
             @foreach($navSections as $section)
                 <div>
                     @if($section['title'])

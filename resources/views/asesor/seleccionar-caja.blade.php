@@ -85,6 +85,9 @@
             transform: translateY(-1px);
         }
         .auth-btn-ghost:active { transform: translateY(0); }
+
+        /* ===================== Indicador de foco visible en radios ===================== */
+        input[type=radio]:focus-visible { outline: 2px solid #064b9e; outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -103,8 +106,7 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo Hospital Universitario del Valle" class="mx-auto h-24 w-auto">
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold leading-tight" style="color: #064b9e;">Hospital Universitario</h1>
-                    <h1 class="text-2xl font-bold leading-tight" style="color: #064b9e;">Del Valle</h1>
+                    <h1 class="text-2xl font-bold leading-tight" style="color: #064b9e;">Hospital Universitario<br>Del Valle</h1>
                     <h2 class="text-base font-semibold text-gray-700 mt-1">"Evaristo García"</h2>
                     <p class="text-sm text-gray-600 mt-1">E.S.E</p>
                 </div>
@@ -215,11 +217,9 @@
                             Continuar
                         </button>
                     @endif
-                    <a href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                       class="auth-btn-ghost">
+                    <button type="submit" form="logout-form" class="auth-btn-ghost">
                         Cerrar Sesión
-                    </a>
+                    </button>
                 </div>
             </form>
 

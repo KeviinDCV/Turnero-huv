@@ -106,16 +106,16 @@
         <table class="w-full divide-y divide-gray-200 border border-gray-200 rounded-lg text-sm">
             <thead>
                 <tr class="bg-[#f6f8fc] text-gray-500 border-b border-gray-200">
-                    <th class="py-3 px-3 text-left font-semibold">TURNO</th>
-                    <th class="py-3 px-3 text-left font-semibold">SERVICIO</th>
-                    <th class="py-3 px-3 text-left font-semibold">PRIORIDAD</th>
-                    <th class="py-3 px-3 text-left font-semibold">ESTADO</th>
-                    <th class="py-3 px-3 text-left font-semibold">ASESOR</th>
-                    <th class="py-3 px-3 text-left font-semibold">CAJA</th>
-                    <th class="py-3 px-3 text-left font-semibold">CREADO</th>
-                    <th class="py-3 px-3 text-left font-semibold">LLAMADO</th>
-                    <th class="py-3 px-3 text-left font-semibold">ATENDIDO</th>
-                    <th class="py-3 px-3 text-left font-semibold">DURACIÓN</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">TURNO</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">SERVICIO</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">PRIORIDAD</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">ESTADO</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">ASESOR</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">CAJA</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">CREADO</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">LLAMADO</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">ATENDIDO</th>
+                    <th scope="col" class="py-3 px-3 text-left font-semibold">DURACIÓN</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">

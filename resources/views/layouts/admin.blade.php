@@ -598,12 +598,31 @@
             }
         }
 
+        /* Enlace para saltar la cabecera y el menú (accesibilidad - WCAG 2.4.1) */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: auto;
+            z-index: 60;
+            background: #fff;
+            color: #072449;
+            padding: .5rem 1rem;
+            border-radius: .375rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        }
+        .skip-link:focus {
+            left: 1rem;
+            top: 1rem;
+        }
+
         @yield('styles')
     </style>
 </head>
 <body class="min-h-screen bg-gray-100"
       x-data="{ sidebarOpen: false, sidebarCollapsed: window.innerWidth >= 768 && localStorage.getItem('huvSidebarCollapsed') === '1' }"
       :class="sidebarCollapsed ? 'sidebar-is-collapsed' : ''">
+    <a href="#main-content" class="skip-link">Saltar al contenido</a>
     @include('components.admin.header')
 
     <div class="flex main-container">
@@ -622,7 +641,7 @@
         @include('components.admin.sidebar')
 
         <!-- Main Content -->
-        <main class="flex-1 main-content pt-16">
+        <main id="main-content" tabindex="-1" class="flex-1 main-content pt-16">
             <div class="p-4 md:p-6">
                 @yield('content')
             </div>

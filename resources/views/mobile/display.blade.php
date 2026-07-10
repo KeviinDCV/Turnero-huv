@@ -53,9 +53,8 @@
             100% { transform: translateX(-100%); }
         }
 
-        @keyframes ticker-glow {
-            0%, 100% { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 255, 255, 0.1); }
-            50% { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.2); }
+        @media (prefers-reduced-motion: reduce) {
+            .ticker-content, .ticker-text { animation: none !important; }
         }
 
         .ticker-container {
@@ -77,7 +76,7 @@
             color: white;
             font-weight: 600;
             font-size: 0.875rem;
-            animation: ticker-glow 3s ease-in-out infinite;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
             letter-spacing: 0.5px;
         }
 
@@ -214,6 +213,7 @@
     </style>
 </head>
 <body class="w-full bg-white overflow-y-auto">
+    <h1 class="sr-only">Turnos - Hospital Universitario del Valle</h1>
     <div class="mobile-container bg-white min-h-screen">
         <!-- Header Section - Compacto para móvil -->
         <div class="bg-hospital-blue-light p-3">
@@ -237,7 +237,6 @@
         @if(isset($turnoInfo) && $turnoInfo)
         <!-- Información del Turno Personal -->
         <div id="turno-personal-container" class="gradient-hospital text-white p-3 shadow-lg">
-            <script>console.log('🎯 TurnoInfo encontrado:', @json($turnoInfo));</script>
 
 
 
@@ -314,10 +313,10 @@
             <!-- Turnos Header - Ahora abajo -->
             <div class="gradient-hospital flex">
                 <div class="flex-1 bg-hospital-blue flex items-center justify-center py-2">
-                    <h1 class="text-lg font-bold text-white">TURNO</h1>
+                    <p class="text-lg font-bold text-white">TURNO</p>
                 </div>
                 <div class="flex-1 gradient-hospital-light flex items-center justify-center py-2">
-                    <h1 class="text-lg font-bold text-white">MÓDULO</h1>
+                    <p class="text-lg font-bold text-white">MÓDULO</p>
                 </div>
             </div>
 
@@ -558,10 +557,33 @@
             }
         }
 
+        // --- Gestión determinista de <video> para evitar fuga de decoders en pantalla 24/7 ---
+        function destruirVideo(video) {
+            if (!video) return;
+            try {
+                video.onloadeddata = null;
+                video.onended = null;
+                video.onerror = null;
+                video.onstalled = null;
+                video.onwaiting = null;
+                video.onplaying = null;
+                video.oncanplay = null;
+                video.pause();
+                video.removeAttribute('src');
+                video.load(); // fuerza a Chrome a liberar el decoder
+            } catch (e) { /* noop */ }
+        }
+
+        function limpiarMultimediaContainer(container) {
+            if (!container) return;
+            container.querySelectorAll('video').forEach(destruirVideo);
+            container.innerHTML = '';
+        }
+
         // Cargar placeholder con transición
         function loadPlaceholder(container) {
-            // Limpiar contenido actual
-            container.innerHTML = '';
+            // Limpiar contenido actual (con teardown de video)
+            limpiarMultimediaContainer(container);
 
             // Crear placeholder con transición
             const placeholderDiv = document.createElement('div');
@@ -628,8 +650,10 @@
 
         // Cargar el archivo multimedia actual
         function loadCurrentMedia(container, media) {
-            // Limpiar contenido actual
-            container.innerHTML = '';
+            // Cancelar cualquier watchdog pendiente del medio anterior
+            if (mediaTimer) { clearTimeout(mediaTimer); mediaTimer = null; }
+            // Limpiar contenido actual (con teardown de video para no fugar decoders)
+            limpiarMultimediaContainer(container);
 
             let mediaElement;
 
@@ -665,21 +689,63 @@
                 mediaElement.autoplay = true;
                 mediaElement.loop = false;
 
+                // Idempotencia: avanzar una sola vez por más que se solapen los watchdogs.
+                let avanzado = false;
+                const avanzarUnaVez = () => {
+                    if (avanzado) return;
+                    avanzado = true;
+                    nextMedia();
+                };
+
+                // Watchdog de carga: si no hay datos en 12s, avanzar (no congelar 24/7).
+                if (mediaTimer) { clearTimeout(mediaTimer); }
+                mediaTimer = setTimeout(() => {
+                    console.warn('⚠️ Video sin datos tras 12s, avanzando:', media.url);
+                    avanzarUnaVez();
+                }, 12000);
+
+                // Estancamiento (buffer underrun): dar 8s y avanzar.
+                let stallTimer = null;
+                const alEstancar = () => {
+                    if (stallTimer) return;
+                    stallTimer = setTimeout(() => {
+                        console.warn('⚠️ Video estancado, avanzando:', media.url);
+                        avanzarUnaVez();
+                    }, 8000);
+                };
+                const alReanudar = () => {
+                    if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+                };
+
                 mediaElement.onloadeddata = function() {
                     // Aplicar transición de entrada
                     setTimeout(() => {
                         mediaElement.classList.remove('media-loading');
                         mediaElement.classList.add('media-fade-in');
                     }, 50);
+
+                    // Watchdog de seguridad: duración real + 10s por si 'onended' no dispara.
+                    if (mediaTimer) { clearTimeout(mediaTimer); }
+                    const durSeg = (isFinite(mediaElement.duration) && mediaElement.duration > 0)
+                        ? mediaElement.duration
+                        : (media.duracion || 30);
+                    mediaTimer = setTimeout(() => {
+                        console.warn('⚠️ Video no finalizó a tiempo, avanzando:', media.url);
+                        avanzarUnaVez();
+                    }, (durSeg + 10) * 1000);
                 };
 
+                mediaElement.onstalled = alEstancar;
+                mediaElement.onwaiting = alEstancar;
+                mediaElement.onplaying = alReanudar;
+
                 mediaElement.onended = function() {
-                    nextMedia();
+                    avanzarUnaVez();
                 };
 
                 mediaElement.onerror = function() {
                     console.error('Error al cargar video:', media.url);
-                    nextMedia();
+                    avanzarUnaVez();
                 };
             }
 
@@ -1163,6 +1229,7 @@
 
         // Función para actualizar la cola de turnos con sincronización completa (COPIADO EXACTAMENTE DE LA VISTA TV)
         function updateQueue() {
+            if (document.hidden) { return; }
             if (!sincronizacionActiva) return;
 
             fetch('/api/turnos-llamados')

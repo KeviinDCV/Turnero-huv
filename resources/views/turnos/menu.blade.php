@@ -136,7 +136,7 @@
                 <button
                     class="btn-service w-full max-w-lg h-16 text-white text-xl font-medium rounded-lg shadow-lg animate-slide-in"
                     style="animation-delay: {{ 0.1 + ($index * 0.05) }}s; animation-fill-mode: both;"
-                    onclick="seleccionarSubservicio({{ $subservicio->id }}, '{{ addslashes($subservicio->nombre) }}')"
+                    onclick="seleccionarSubservicio({{ $subservicio->id }}, @js($subservicio->nombre))"
                 >
                     {{ strtoupper($subservicio->nombre) }}
                 </button>
@@ -144,7 +144,7 @@
                 <button
                     class="btn-service w-full max-w-lg h-16 text-white text-xl font-medium rounded-lg shadow-lg animate-slide-in"
                     style="animation-delay: 0.1s; animation-fill-mode: both;"
-                    onclick="seleccionarServicio({{ $servicioSeleccionado->id }}, '{{ addslashes($servicioSeleccionado->nombre) }}')"
+                    onclick="seleccionarServicio({{ $servicioSeleccionado->id }}, @js($servicioSeleccionado->nombre))"
                 >
                     {{ strtoupper($servicioSeleccionado->nombre) }}
                 </button>
@@ -161,7 +161,7 @@
                     @if($tieneSubservicios)
                         onclick="navegarASubservicios({{ $servicio->id }})"
                     @else
-                        onclick="seleccionarServicio({{ $servicio->id }}, '{{ addslashes($servicio->nombre) }}')"
+                        onclick="seleccionarServicio({{ $servicio->id }}, @js($servicio->nombre))"
                     @endif
                 >
                     {{ strtoupper($servicio->nombre) }}
@@ -189,11 +189,11 @@
     </div>
 
     <!-- Modal de selección de prioridad -->
-    <div id="prioridadModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
+    <div id="prioridadModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="prioridadModalTitle">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-y-auto max-h-[90vh] animate-slide-in">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Seleccione el Tipo de Turno</h3>
+                    <h3 id="prioridadModalTitle" class="text-xl font-bold text-gray-900">Seleccione el Tipo de Turno</h3>
                     <button onclick="cerrarPrioridadModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -229,7 +229,7 @@
     </div>
 
     <!-- Modal de confirmación personalizado -->
-    <div id="confirmModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;">
+    <div id="confirmModal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center p-4" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
         <div class="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full mx-4 animate-slide-in">
             <div class="text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
@@ -237,7 +237,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Turno Solicitado</h3>
+                <h3 id="confirmModalTitle" class="text-lg font-medium text-gray-900 mb-2">Turno Solicitado</h3>
                 <p id="confirmMessage" class="text-sm text-gray-500 mb-4"></p>
                 <button onclick="cerrarModal()" class="btn-service px-4 py-2 text-white rounded-md hover:opacity-90 transition-opacity">
                     Aceptar
@@ -405,6 +405,20 @@
         function cerrarModal() {
             document.getElementById('confirmModal').style.display = 'none';
         }
+
+        // Cerrar modales visibles con la tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const prioridadModal = document.getElementById('prioridadModal');
+                if (prioridadModal && prioridadModal.style.display !== 'none') {
+                    cerrarPrioridadModal();
+                }
+                const confirmModal = document.getElementById('confirmModal');
+                if (confirmModal && confirmModal.style.display !== 'none') {
+                    cerrarModal();
+                }
+            }
+        });
 
         // Agregar efecto de vibración en dispositivos móviles al tocar botones
         document.querySelectorAll('button').forEach(button => {

@@ -432,7 +432,6 @@ document.getElementById('reporteForm').addEventListener('submit', function(e) {
 // Inicializar estado del formulario
 document.addEventListener('DOMContentLoaded', function() {
     // El formulario está listo para usar
-    console.log('Formulario de reportes inicializado');
 });
 </script>
 

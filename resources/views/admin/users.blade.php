@@ -6,7 +6,7 @@
     <!-- Para el modal -->
     <style>
         /* Eliminar anillo de resaltado en inputs */
-        input:focus, select:focus {
+        input:focus:not(:focus-visible), select:focus:not(:focus-visible) {
             outline: none !important;
             box-shadow: none !important;
             ring: 0 !important;
@@ -15,6 +15,11 @@
             --tw-ring-color: transparent !important;
             --tw-ring-offset-shadow: none !important;
             --tw-ring-shadow: none !important;
+        }
+
+        input:focus-visible, select:focus-visible {
+            outline: 2px solid #064b9e;
+            outline-offset: 2px;
         }
 
         /* Estilo natural para inputs */
@@ -94,6 +99,9 @@
                     <!-- Modal para crear usuario -->
                     <div
                         x-show="openModal"
+                        role="dialog"
+                        aria-modal="true"
+                        @keydown.escape.window="openModal = false"
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0"
                         x-transition:enter-end="opacity-100"
@@ -116,8 +124,8 @@
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-6">
                                     <h2 class="text-xl font-bold text-gray-800">Crear Nuevo Usuario</h2>
-                                    <button @click="openModal = false" class="text-gray-500 hover:text-gray-700 cursor-pointer">
-                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <button @click="openModal = false" aria-label="Cerrar" class="text-gray-500 hover:text-gray-700 cursor-pointer">
+                                        <svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
                                     </button>
@@ -250,6 +258,7 @@
                             <input
                                 type="text"
                                 x-model="search"
+                                aria-label="Buscar usuarios"
                                 placeholder="Buscar por nombre, cédula, correo, usuario o rol..."
                                 class="w-full px-4 py-2 focus:outline-none focus:border-hospital-blue"
                             >
@@ -268,12 +277,12 @@
                         <table class="w-full divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden">
                             <thead>
                                 <tr class="bg-[#f6f8fc] text-gray-500 border-b border-gray-200">
-                                    <th class="py-3 px-4 text-left font-semibold">NOMBRE</th>
-                                    <th class="py-3 px-4 text-left font-semibold">CÉDULA</th>
-                                    <th class="py-3 px-4 text-left font-semibold">CORREO</th>
-                                    <th class="py-3 px-4 text-left font-semibold">USUARIO</th>
-                                    <th class="py-3 px-4 text-left font-semibold">ROL</th>
-                                    <th class="py-3 px-4 text-center font-semibold">OPCIONES</th>
+                                    <th scope="col" class="py-3 px-4 text-left font-semibold">NOMBRE</th>
+                                    <th scope="col" class="py-3 px-4 text-left font-semibold">CÉDULA</th>
+                                    <th scope="col" class="py-3 px-4 text-left font-semibold">CORREO</th>
+                                    <th scope="col" class="py-3 px-4 text-left font-semibold">USUARIO</th>
+                                    <th scope="col" class="py-3 px-4 text-left font-semibold">ROL</th>
+                                    <th scope="col" class="py-3 px-4 text-center font-semibold">OPCIONES</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
@@ -364,8 +373,8 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-xl font-bold text-gray-800">Editar Usuario</h2>
-                        <button @click="isOpen = false" class="text-gray-500 hover:text-gray-700 cursor-pointer">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="isOpen = false" aria-label="Cerrar" class="text-gray-500 hover:text-gray-700 cursor-pointer">
+                            <svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
@@ -738,8 +747,6 @@
                         return;
                     }
 
-                    console.log('Deleting user with ID:', this.userId);
-
                     fetch(`/admin/usuarios/${this.userId}`, {
                         method: 'DELETE',
                         headers: {
@@ -749,7 +756,6 @@
                         }
                     })
                     .then(response => {
-                        console.log('Response status:', response.status);
                         return response.json().then(data => {
                             if (response.ok) {
                                 // Cerrar el modal

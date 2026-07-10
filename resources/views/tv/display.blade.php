@@ -9,7 +9,8 @@
     <!-- Fonts - Optimized loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -88,11 +89,6 @@
             100% { transform: translateX(-100%); }
         }
 
-        @keyframes ticker-glow {
-            0%, 100% { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 255, 255, 0.1); }
-            50% { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.2); }
-        }
-
         .ticker-container {
             overflow: hidden;
             white-space: nowrap;
@@ -112,7 +108,7 @@
             color: white;
             font-weight: 600;
             font-size: 1.25rem;
-            animation: ticker-glow 3s ease-in-out infinite;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.5px;
         }
 
@@ -2216,8 +2212,8 @@
 
         // Cargar placeholder con transición
         function loadPlaceholder(container) {
-            // Limpiar contenido actual
-            container.innerHTML = '';
+            // Limpiar contenido actual (con teardown de video)
+            limpiarMultimediaContainer(container);
 
             // Crear placeholder con transición
             const placeholderDiv = document.createElement('div');
@@ -2279,10 +2275,33 @@
             }
         }
 
+        // --- Gestión determinista de <video> para evitar fuga de decoders en pantalla 24/7 ---
+        function destruirVideo(video) {
+            if (!video) return;
+            try {
+                video.onloadeddata = null;
+                video.onended = null;
+                video.onerror = null;
+                video.onstalled = null;
+                video.onwaiting = null;
+                video.onplaying = null;
+                video.oncanplay = null;
+                video.pause();
+                video.removeAttribute('src');
+                video.load(); // fuerza a Chrome a liberar el decoder
+            } catch (e) { /* noop */ }
+        }
+
+        function limpiarMultimediaContainer(container) {
+            if (!container) return;
+            container.querySelectorAll('video').forEach(destruirVideo);
+            container.innerHTML = '';
+        }
+
         // Cargar nuevo archivo multimedia
         function loadNewMedia(media, container) {
-            // Limpiar contenido anterior
-            container.innerHTML = '';
+            // Limpiar contenido anterior (con teardown de video para no fugar decoders)
+            limpiarMultimediaContainer(container);
 
             if (media.tipo === 'imagen') {
                 // Mostrar imagen
@@ -2324,6 +2343,36 @@
                 video.muted = true;
                 video.loop = false;
 
+                // Idempotencia: cada cadena de avance de ESTE video ocurre una sola vez,
+                // aunque se solapen los watchdogs (evita doble-avance / cadenas fantasma).
+                let avanzado = false;
+                const avanzarUnaVez = () => {
+                    if (avanzado) return;
+                    avanzado = true;
+                    nextMedia();
+                };
+
+                // Watchdog de carga: si el video no entrega datos en 12s (se traba antes
+                // de tener metadata), avanzar en vez de congelar la cola 24/7.
+                if (mediaTimer) { clearTimeout(mediaTimer); }
+                mediaTimer = setTimeout(() => {
+                    console.warn('⚠️ Video sin datos tras 12s, avanzando:', media.url);
+                    avanzarUnaVez();
+                }, 12000);
+
+                // Estancamiento (buffer underrun): dar 8s y avanzar.
+                let stallTimer = null;
+                const alEstancar = () => {
+                    if (stallTimer) return;
+                    stallTimer = setTimeout(() => {
+                        console.warn('⚠️ Video estancado, avanzando:', media.url);
+                        avanzarUnaVez();
+                    }, 8000);
+                };
+                const alReanudar = () => {
+                    if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+                };
+
                 video.onloadeddata = () => {
                     container.appendChild(video);
                     intentosCargaMedia = 0; // Resetear contador al cargar exitosamente
@@ -2333,18 +2382,30 @@
                         video.classList.remove('media-loading');
                         video.classList.add('media-fade-in', 'media-enter');
                     }, 50);
+
+                    // Reprogramar watchdog de seguridad: duración real + 10s por si
+                    // 'onended' nunca se dispara (stall silencioso).
+                    if (mediaTimer) { clearTimeout(mediaTimer); }
+                    const durSeg = (isFinite(video.duration) && video.duration > 0)
+                        ? video.duration
+                        : (media.duracion || 30);
+                    mediaTimer = setTimeout(() => {
+                        console.warn('⚠️ Video no finalizó a tiempo, avanzando:', media.url);
+                        avanzarUnaVez();
+                    }, (durSeg + 10) * 1000);
                 };
 
+                video.onstalled = alEstancar;
+                video.onwaiting = alEstancar;
+                video.onplaying = alReanudar;
+
                 video.onended = () => {
-                    nextMedia();
+                    avanzarUnaVez();
                 };
 
                 video.onerror = () => {
                     console.error('Error al cargar video:', media.url);
-                    // Intentar siguiente media después de un breve delay
-                    setTimeout(() => {
-                        nextMedia();
-                    }, 500);
+                    avanzarUnaVez();
                 };
             }
         }

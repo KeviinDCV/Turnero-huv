@@ -110,8 +110,9 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
         <!-- QR Code - Small and Simple -->
-        <div class="absolute top-2 right-2 qr-small">
+        <div class="absolute top-2 right-2 qr-small" role="img" aria-label="Código QR para seguir su turno en el celular">
             {!! QrCode::size(40)->generate(route('mobile.display', ['turno' => $turno->id])) !!}
+            <span class="sr-only">Siga su turno en su celular escaneando este código.</span>
         </div>
 
 

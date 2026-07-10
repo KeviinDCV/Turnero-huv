@@ -82,7 +82,7 @@
     </div>
 
     <!-- Contenido principal -->
-    <div class="min-h-screen flex flex-col items-center justify-center p-8 cursor-touch ripple" onclick="window.location.href='{{ route('turnos.menu') }}'">
+    <a href="{{ route('turnos.menu') }}" class="min-h-screen flex flex-col items-center justify-center p-8 cursor-touch ripple" style="text-decoration:none; color:inherit;" aria-label="Toque la pantalla para continuar y solicitar su turno">
         <!-- Logo del Hospital -->
         <div class="mb-12 animate-fade-in">
             <img src="{{ asset('images/logo.png') }}" alt="Logo Hospital Universitario del Valle" class="mx-auto h-32 w-auto animate-float">
@@ -115,10 +115,10 @@
         <!-- Instrucción adicional -->
         <div class="absolute bottom-8 left-0 right-0 text-center animate-fade-in" style="animation-delay: 1s; animation-fill-mode: both;">
             <p class="text-lg text-gray-500">
-                👆 Toque en cualquier parte de la pantalla
+                <span aria-hidden="true">👆</span> Toque en cualquier parte de la pantalla
             </p>
         </div>
-    </div>
+    </a>
 
     <!-- Firma -->
     <div class="absolute bottom-4 right-4">

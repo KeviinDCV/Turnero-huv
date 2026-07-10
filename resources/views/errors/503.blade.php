@@ -156,29 +156,10 @@
                         <span class="font-semibold text-yellow-800 text-sm">Mantenimiento en Progreso</span>
                     </div>
                     <p class="text-xs text-yellow-700">
-                        Verifica que todos los servicios necesarios estén funcionando correctamente.
+                        Estamos restableciendo el servicio lo antes posible. Gracias por su paciencia.
                     </p>
                 </div>
 
-                <!-- Lista de verificación -->
-                <div class="text-left mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <h3 class="font-semibold text-hospital-blue mb-2 text-center text-sm">🔍 Verificar:</h3>
-                    <div class="space-y-1 text-xs">
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
-                            <span>Servidor de base de datos (MySQL/XAMPP)</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
-                            <span>Servicios web del servidor</span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="w-2 h-2 bg-red-400 rounded-full mr-2"></span>
-                            <span>Configuración de red</span>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Botones de acción -->
                 <div class="flex flex-col sm:flex-row gap-2 justify-center mb-4">
                     <button onclick="checkAndReload()" class="retry-btn" id="retryBtn">
@@ -203,7 +184,7 @@
                 <!-- Información adicional -->
                 <div class="p-3 bg-blue-50 rounded-lg">
                     <p class="text-xs text-blue-700">
-                        💡 <strong>Sugerencia:</strong> Si eres administrador, verifica que XAMPP esté ejecutándose y que el servicio MySQL esté activo.
+                        💡 <strong>Sugerencia:</strong> Por favor espere unos minutos e intente nuevamente. Si el problema persiste, informe al personal de la sala.
                     </p>
                 </div>
             </div>

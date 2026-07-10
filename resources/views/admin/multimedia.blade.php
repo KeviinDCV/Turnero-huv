@@ -126,7 +126,7 @@
                                         </button>
                                         
                                         <!-- Eliminar -->
-                                        <button onclick="confirmDelete({{ $item->id }}, '{{ addslashes($item->nombre) }}')" 
+                                        <button onclick="confirmDelete({{ $item->id }}, @js($item->nombre))"
                                                 class="px-3 py-1 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200 transition-colors">
                                             Eliminar
                                         </button>
