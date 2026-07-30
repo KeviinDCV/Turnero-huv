@@ -620,6 +620,43 @@
             top: 1rem;
         }
 
+        /* ================= ESTILO MINIMALISTA: SIN BORDES =================
+           Quita los bordes de CARDS, MODALES y BOTONES en todas las vistas.
+
+           Por que se hace aqui y no editando cada vista: son ~1.200 usos de
+           "border" repartidos en 20 archivos. Centralizarlo es reversible
+           (basta borrar este bloque) y no se escapa ninguna vista.
+
+           Clave: se usa el selector COMPUESTO ".border.border-gray-200", que
+           solo alcanza a los elementos con borde COMPLETO (clase `border`).
+           Los separadores direccionales (`border-b`, `border-t`, `border-l-4`)
+           NO llevan la clase `border`, asi que se conservan intactos.
+
+           Se usa `border-color: transparent` en vez de `border: none` para que
+           NO haya corrimiento de layout: el ancho del borde se mantiene.
+
+           NO se tocan a proposito: inputs/selects/textarea (border-gray-300),
+           separadores de tabla, acentos laterales de color (border-l-4) ni el
+           spinner de carga (border-b-2 border-white). */
+
+        /* Cards y contenedores con borde completo */
+        .border.border-gray-200,
+        .border.border-gray-100 {
+            border-color: transparent;
+        }
+
+        /* Botones secundarios: sin borde, con fondo gris muy suave para que
+           sigan siendo visibles sobre las cards blancas. */
+        button.border.border-gray-300,
+        a.border.border-gray-300 {
+            border-color: transparent;
+            background-color: #eef1f6;
+        }
+        button.border.border-gray-300:hover,
+        a.border.border-gray-300:hover {
+            background-color: #e2e8f2;
+        }
+
         @yield('styles')
     </style>
 </head>
