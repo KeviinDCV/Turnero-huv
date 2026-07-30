@@ -671,7 +671,8 @@
            resaltado azul de `hover:border-hospital-blue`, que es la unica
            senal de que la opcion es clicable. */
         div.border-2.border-gray-200:not(:hover),
-        label.border-2.border-gray-200:not(:hover) {
+        label.border-2.border-gray-200:not(:hover),
+        label.border.border-gray-200:not(:hover) {
             border-color: transparent;
         }
 
