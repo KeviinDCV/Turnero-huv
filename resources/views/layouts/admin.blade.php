@@ -639,21 +639,43 @@
            separadores de tabla, acentos laterales de color (border-l-4) ni el
            spinner de carga (border-b-2 border-white). */
 
-        /* Cards y contenedores con borde completo */
-        .border.border-gray-200,
-        .border.border-gray-100 {
+        /* --- Cards y paneles ---
+           El ancla `div.` es DELIBERADA: hay <table> que tambien usan
+           "border border-gray-200" (cajas, turnos, users) y su borde SI debe
+           conservarse, porque una tabla no es una card. */
+        div.border.border-gray-200,
+        div.border.border-gray-100 {
             border-color: transparent;
         }
 
-        /* Botones secundarios: sin borde, con fondo gris muy suave para que
-           sigan siendo visibles sobre las cards blancas. */
-        button.border.border-gray-300,
-        a.border.border-gray-300 {
+        /* Tiles de metrica y avisos de color (turnos, reportes): conservan su
+           fondo de color, que ya comunica el estado sin necesidad del borde. */
+        div.border.border-blue-200,
+        div.border.border-green-200,
+        div.border.border-yellow-200,
+        div.border.border-red-200,
+        div.border.border-purple-200 {
             border-color: transparent;
+        }
+
+        /* --- Botones ---
+           :not(.tab-button) protege el indicador de pestana activa, que se
+           dibuja con borde y que el JS reescribe en caliente. */
+        button.border.border-gray-300:not(.tab-button),
+        button.border.border-gray-200:not(.tab-button),
+        button.border.border-hospital-blue:not(.tab-button),
+        a.border.border-gray-300:not(.tab-button) {
+            border-color: transparent;
+        }
+
+        /* Los secundarios blancos se quedarian invisibles sobre la card blanca:
+           se les da un gris muy suave para que sigan leyendose como boton. */
+        button.border.border-gray-300:not(.tab-button),
+        a.border.border-gray-300:not(.tab-button) {
             background-color: #eef1f6;
         }
-        button.border.border-gray-300:hover,
-        a.border.border-gray-300:hover {
+        button.border.border-gray-300:not(.tab-button):hover,
+        a.border.border-gray-300:not(.tab-button):hover {
             background-color: #e2e8f2;
         }
 
