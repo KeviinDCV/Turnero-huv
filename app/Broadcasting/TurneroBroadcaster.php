@@ -13,8 +13,14 @@ class TurneroBroadcaster
      */
     public static function init()
     {
-        // Log para depuración
-        Log::info('Inicializando TurneroBroadcaster');
+        // Log para depuración.
+        // OJO: esto se escribía en CADA petición. Con el polling del TV y de los
+        // asesores (~5 peticiones/segundo) generaba ~80.000 líneas al día: 26 MB
+        // en 5 horas, en un archivo que no rota. Riesgo real de llenar el disco
+        // del cPanel. Ahora solo se escribe con APP_DEBUG=true y a nivel debug.
+        if (config('app.debug')) {
+            Log::debug('Inicializando TurneroBroadcaster');
+        }
 
         // Configurar programáticamente para usar Pusher con credenciales de la app
         app()->singleton('pusher', function ($app) {
@@ -39,6 +45,16 @@ class TurneroBroadcaster
      */
     public static function broadcast($channel, $event, $data)
     {
+        // Si el broadcasting no está en 'pusher', no se intenta nada.
+        // En producción el servidor WebSocket (127.0.0.1:6001) NO existe, y cada
+        // intento fallaba con "cURL error 7: Connection refused", llenando el log
+        // con ~50 errores por hora. El turnero funciona igual porque el TV y los
+        // tableros consultan por polling. Para reactivarlo basta levantar el
+        // servidor y poner BROADCAST_DRIVER=pusher en el .env.
+        if (config('broadcasting.default') !== 'pusher') {
+            return false;
+        }
+
         try {
             app('pusher')->trigger($channel, $event, $data);
             Log::info("Mensaje enviado a canal: {$channel}, evento: {$event}", ['data' => $data]);
