@@ -21,27 +21,21 @@
             ],
         ],
         [
-            'title' => 'Administración',
-            'items' => [
-                ['label' => 'Usuarios', 'route' => 'admin.users', 'icon' => 'users', 'hint' => 'Roles y accesos'],
-            ],
-        ],
-        [
             'title' => 'Análisis',
             'items' => [
                 ['label' => 'Gráficos', 'route' => 'admin.graficos', 'icon' => 'chart', 'hint' => 'Indicadores'],
                 ['label' => 'Reportes', 'route' => 'admin.reportes', 'icon' => 'report', 'hint' => 'Exportaciones'],
             ],
         ],
+        // Se agrupan aquí los tres destinos que antes tenían una sección propia
+        // con un solo ítem (Administración, Pantallas y Ayuda). Cinco encabezados
+        // para diez enlaces desbalanceaban el menú y obligaban a hacer scroll en
+        // portátiles de 768 px de alto.
         [
-            'title' => 'Pantallas',
+            'title' => 'Gestión',
             'items' => [
+                ['label' => 'Usuarios', 'route' => 'admin.users', 'icon' => 'users', 'hint' => 'Roles y accesos'],
                 ['label' => 'Config TV', 'route' => 'admin.tv-config', 'icon' => 'monitor', 'hint' => 'Pantalla pública'],
-            ],
-        ],
-        [
-            'title' => 'Ayuda',
-            'items' => [
                 ['label' => 'Soporte', 'route' => 'admin.soporte', 'icon' => 'help', 'hint' => 'Asistencia'],
             ],
         ],
@@ -60,7 +54,7 @@
                 </span>
                 <span class="min-w-0 sidebar-label" x-show="!sidebarCollapsed">
                     <span class="block text-base font-semibold leading-tight truncate">Turnero HUV</span>
-                    <span class="block text-xs truncate" style="color: #9db8dd;">Panel administrativo</span>
+                    <span class="block leading-tight truncate" style="color: #9db8dd; font-size: 10px;">Panel administrativo</span>
                 </span>
             </a>
 
@@ -160,9 +154,9 @@
 
     <!-- Footer -->
     <div class="flex-shrink-0 px-3 py-3" style="border-top: 1px solid rgba(255,255,255,0.10);">
-        <div class="sidebar-label px-2 pb-2.5" x-show="!sidebarCollapsed">
-            <div class="text-[11px] font-medium text-white">"Evaristo García" E.S.E</div>
-            <div class="text-[11px]" style="color: #9db8dd;">Turnero HUV · Innovación y desarrollo</div>
+        <div class="sidebar-label px-2 pb-2" x-show="!sidebarCollapsed">
+            <div class="font-semibold text-white leading-tight truncate" style="font-size: 10px;">"Evaristo García" E.S.E</div>
+            <div class="leading-tight truncate" style="color: #9db8dd; font-size: 10px;">Innovación y Desarrollo</div>
         </div>
 
         <form method="POST" action="{{ route('logout') }}">
