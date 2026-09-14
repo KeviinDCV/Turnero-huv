@@ -77,13 +77,32 @@ class ReportesController extends Controller
     /**
      * Mostrar la vista principal de reportes
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $usuarios = User::where('rol', 'Asesor')->orderBy('nombre_completo')->get();
-        $servicios = Servicio::where('estado', 'activo')->orderBy('nombre')->get();
 
-        return view('admin.reportes', compact('user', 'usuarios', 'servicios'));
+        $asesores = User::where('rol', 'Asesor')->orderBy('nombre_completo')->get(['id', 'nombre_completo', 'nombre_usuario'])
+            ->map(fn ($u) => ['id' => (int) $u->id, 'nombre' => $u->nombre_completo ?: $u->nombre_usuario, 'usuario' => $u->nombre_usuario])->values();
+
+        // Secciones con sus subservicios (también los inactivos: pueden tener turnos en el periodo).
+        $servicios = Servicio::orderBy('orden')->orderBy('nombre')->get(['id', 'nombre', 'servicio_padre_id', 'estado']);
+        $hijosDe = $servicios->whereNotNull('servicio_padre_id')->groupBy('servicio_padre_id');
+        $fila = fn ($s) => ['id' => (int) $s->id, 'nombre' => $s->nombre, 'activo' => $s->estado === 'activo'];
+        $secciones = $servicios->filter(fn ($s) => !$s->servicio_padre_id || !$servicios->contains('id', $s->servicio_padre_id))
+            ->map(fn ($s) => $fila($s) + ['hijos' => $hijosDe->get($s->id, collect())->map($fila)->values()->all()])
+            ->values();
+
+        // Valores iniciales desde la URL (Gráficos enlaza aquí con su mismo periodo y servicio).
+        $fecha = function ($v) {
+            try { return $v ? Carbon::createFromFormat('!Y-m-d', (string) $v)->toDateString() : null; } catch (\Throwable $e) { return null; }
+        };
+        $inicial = [
+            'desde' => $fecha($request->query('desde')),
+            'hasta' => $fecha($request->query('hasta')),
+            'servicio' => (int) $request->query('servicio') ?: null,
+        ];
+
+        return view('admin.reportes', compact('user', 'asesores', 'secciones', 'inicial'));
     }
 
     /**
@@ -94,48 +113,99 @@ class ReportesController extends Controller
         $request->validate([
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'alcance' => 'nullable|in:todo,servicios,asesores',
             'usuarios' => 'nullable|array',
+            'usuarios.*' => 'integer',
             'servicios' => 'nullable|array',
+            'servicios.*' => 'integer',
             'formato' => 'required|in:excel,pdf'
+        ], [
+            'fecha_fin.after_or_equal' => 'La fecha final no puede ser anterior a la inicial.',
         ]);
 
         $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
         $fechaFin = Carbon::parse($request->fecha_fin)->endOfDay();
-        $usuarios = $request->usuarios ?? [];
-        $servicios = $request->servicios ?? [];
+        $usuarios = array_map('intval', $request->usuarios ?? []);
+        $servicios = array_map('intval', $request->servicios ?? []);
 
-        // VALIDACIÓN: Debe haber al menos usuarios O servicios seleccionados
-        if (empty($usuarios) && empty($servicios)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Debe seleccionar al menos un usuario o un servicio para generar el reporte'
-            ], 422);
+        // Alcance explícito. Sin alcance (enlaces antiguos) se deduce de lo marcado; nada marcado = todo el turnero.
+        $alcance = $request->alcance ?: (!empty($servicios) ? 'servicios' : (!empty($usuarios) ? 'asesores' : 'todo'));
+        if ($alcance === 'servicios' && empty($servicios)) {
+            return response()->json(['success' => false, 'message' => 'Elige al menos un servicio o cambia a «Todo el turnero».'], 422);
+        }
+        if ($alcance === 'asesores' && empty($usuarios)) {
+            return response()->json(['success' => false, 'message' => 'Elige al menos un asesor o cambia a «Todo el turnero».'], 422);
         }
 
-        // Construir consulta base
+        // Una sección incluye sus subservicios (los turnos se registran en los subservicios).
+        if ($alcance === 'servicios') {
+            $servicios = array_values(array_unique(array_merge(
+                $servicios, Servicio::whereIn('servicio_padre_id', $servicios)->pluck('id')->map(fn ($id) => (int) $id)->all()
+            )));
+        }
+
+        // Periodo por la hora real de llegada (created_at): fecha_creacion se reescribe en cada cambio del turno.
         $query = Turno::with(['servicio', 'asesor', 'caja'])
-            ->whereBetween('fecha_creacion', [$fechaInicio, $fechaFin]);
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin]);
 
-        // Filtrar por usuarios si se especifica
-        if (!empty($usuarios)) {
+        if ($alcance === 'asesores') {
             $query->whereIn('asesor_id', $usuarios);
-        }
-
-        // Filtrar por servicios si se especifica
-        if (!empty($servicios)) {
+        } elseif ($alcance === 'servicios') {
             $query->whereIn('servicio_id', $servicios);
         }
 
-        $turnos = $query->orderBy('fecha_creacion', 'desc')->get();
+        $turnos = $query->orderBy('created_at', 'desc')->get();
 
         // Generar estadísticas
         $estadisticas = $this->generarEstadisticas($turnos, $fechaInicio, $fechaFin);
 
+        // Lo que el archivo debe decir de sí mismo: unidad, alcance y quién lo generó.
+        $contexto = [
+            'unidad' => config('panel.unidad_nombre', 'Turnero'),
+            'alcance' => $this->textoAlcance($alcance, $servicios, $usuarios),
+            'alcance_clave' => $alcance,
+            'generado_por' => Auth::user()?->nombre_completo ?: (Auth::user()?->nombre_usuario ?? ''),
+        ];
+
         if ($request->formato === 'excel') {
-            return $this->exportarExcel($turnos, $estadisticas, $fechaInicio, $fechaFin);
+            return $this->exportarExcel($turnos, $estadisticas, $fechaInicio, $fechaFin, $contexto);
         } else {
-            return $this->exportarPDF($turnos, $estadisticas, $fechaInicio, $fechaFin);
+            return $this->exportarPDF($turnos, $estadisticas, $fechaInicio, $fechaFin, $contexto);
         }
+    }
+
+    /**
+     * "Todo el turnero", "Servicios: A, B y 3 más" o "Asesores: …" para el encabezado del archivo.
+     */
+    private function textoAlcance(string $alcance, array $servicios, array $usuarios): string
+    {
+        $lista = function ($nombres) {
+            $nombres = array_values(array_filter($nombres));
+            return count($nombres) > 4 ? implode(', ', array_slice($nombres, 0, 4)) . ' y ' . (count($nombres) - 4) . ' más' : implode(', ', $nombres);
+        };
+
+        if ($alcance === 'servicios') {
+            // Se nombran las secciones completas y los subservicios sueltos (no cada hijo de una sección elegida).
+            $elegidos = Servicio::whereIn('id', $servicios)->get(['id', 'nombre', 'servicio_padre_id']);
+            $nombres = $elegidos->filter(fn ($s) => !$s->servicio_padre_id || !$elegidos->contains('id', $s->servicio_padre_id))->pluck('nombre')->all();
+            return 'Servicios: ' . $lista($nombres);
+        }
+        if ($alcance === 'asesores') {
+            return 'Asesores: ' . $lista(User::whereIn('id', $usuarios)->orderBy('nombre_completo')->pluck('nombre_completo')->all());
+        }
+
+        return 'Todo el turnero';
+    }
+
+    /**
+     * informe_turnos_<unidad>_<alcance>_<desde>_<hasta>.<ext>: se distinguen los archivos de cada turnero y alcance.
+     */
+    private function nombreArchivo(array $contexto, $fechaInicio, $fechaFin, string $extension): string
+    {
+        $unidad = \Illuminate\Support\Str::slug($contexto['unidad'] ?? 'turnero', '_');
+        $alcance = ['servicios' => 'por_servicio', 'asesores' => 'por_asesor'][$contexto['alcance_clave'] ?? ''] ?? 'general';
+
+        return 'informe_turnos_' . $unidad . '_' . $alcance . '_' . $fechaInicio->format('Y-m-d') . '_' . $fechaFin->format('Y-m-d') . '.' . $extension;
     }
 
     /**
@@ -233,7 +303,7 @@ class ReportesController extends Controller
 
         // Estadísticas por día
         $porDia = $turnos->groupBy(function ($turno) {
-            return Carbon::parse($turno->fecha_creacion)->format('Y-m-d');
+            return Carbon::parse($turno->created_at)->format('Y-m-d');
         })->map(function ($grupo) {
             return [
                 'total' => $grupo->count(),
@@ -261,12 +331,12 @@ class ReportesController extends Controller
     /**
      * Exportar a Excel
      */
-    private function exportarExcel($turnos, $estadisticas, $fechaInicio, $fechaFin)
+    private function exportarExcel($turnos, $estadisticas, $fechaInicio, $fechaFin, array $contexto = [])
     {
         $spreadsheet = new Spreadsheet();
 
         // Hoja 1: Resumen
-        $this->crearHojaResumen($spreadsheet, $estadisticas, $fechaInicio, $fechaFin);
+        $this->crearHojaResumen($spreadsheet, $estadisticas, $fechaInicio, $fechaFin, $contexto);
 
         // Hoja 2: Detalle de turnos
         $this->crearHojaDetalle($spreadsheet, $turnos);
@@ -288,7 +358,7 @@ class ReportesController extends Controller
             }
         }
 
-        $filename = 'reporte_turnos_' . $fechaInicio->format('Y-m-d') . '_' . $fechaFin->format('Y-m-d') . '.xlsx';
+        $filename = $this->nombreArchivo($contexto, $fechaInicio, $fechaFin, 'xlsx');
 
         $writer = new Xlsx($spreadsheet);
 
@@ -302,9 +372,10 @@ class ReportesController extends Controller
     /**
      * Exportar a PDF
      */
-    private function exportarPDF($turnos, $estadisticas, $fechaInicio, $fechaFin)
+    private function exportarPDF($turnos, $estadisticas, $fechaInicio, $fechaFin, array $contexto = [])
     {
         $data = [
+            'contexto' => $contexto,
             'turnos' => $turnos,
             'estadisticas' => $estadisticas,
             'fecha_inicio' => $fechaInicio,
@@ -315,7 +386,7 @@ class ReportesController extends Controller
         $pdf = Pdf::loadView('admin.reportes.pdf', $data);
         $pdf->setPaper('A4', 'portrait');
 
-        $filename = 'reporte_turnos_' . $fechaInicio->format('Y-m-d') . '_' . $fechaFin->format('Y-m-d') . '.pdf';
+        $filename = $this->nombreArchivo($contexto, $fechaInicio, $fechaFin, 'pdf');
 
         return $pdf->download($filename);
     }
@@ -655,13 +726,13 @@ class ReportesController extends Controller
     /**
      * Crear hoja de resumen en Excel
      */
-    private function crearHojaResumen($spreadsheet, $estadisticas, $fechaInicio, $fechaFin)
+    private function crearHojaResumen($spreadsheet, $estadisticas, $fechaInicio, $fechaFin, array $contexto = [])
     {
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Resumen');
 
         // Encabezado
-        $sheet->setCellValue('A1', 'REPORTE DE TURNOS - HOSPITAL UNIVERSITARIO DEL VALLE');
+        $sheet->setCellValue('A1', 'INFORME DE TURNOS - ' . mb_strtoupper($contexto['unidad'] ?? '', 'UTF-8') . ' - HOSPITAL UNIVERSITARIO DEL VALLE');
         $sheet->mergeCells('A1:F1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -672,8 +743,12 @@ class ReportesController extends Controller
         $sheet->getStyle('A3')->getFont()->setBold(true);
 
         // Fecha de generación
-        $sheet->setCellValue('A4', 'Fecha de generación: ' . Carbon::now()->format('d/m/Y H:i:s'));
+        $sheet->setCellValue('A4', 'Fecha de generación: ' . Carbon::now()->format('d/m/Y H:i:s') . (!empty($contexto['generado_por']) ? ' · ' . $contexto['generado_por'] : ''));
         $sheet->mergeCells('A4:F4');
+
+        // Alcance: qué turnos entran en este informe
+        $sheet->setCellValue('A5', 'Alcance: ' . ($contexto['alcance'] ?? 'Todo el turnero'));
+        $sheet->mergeCells('A5:F5');
 
         // Resumen general
         $row = 6;
@@ -767,11 +842,11 @@ class ReportesController extends Controller
             $sheet->setCellValue('A' . $row, $turno->codigo);
             $sheet->setCellValue('B' . $row, $turno->numero);
             $sheet->setCellValue('C' . $row, $turno->servicio->nombre ?? 'N/A');
-            $sheet->setCellValue('D' . $row, $turno->asesor->nombre_usuario ?? 'N/A');
+            $sheet->setCellValue('D' . $row, $turno->asesor->nombre_completo ?? ($turno->asesor->nombre_usuario ?? 'N/A'));
             $sheet->setCellValue('E' . $row, $turno->caja->nombre ?? 'N/A');
             $sheet->setCellValue('F' . $row, strtoupper($turno->estado));
-            $sheet->setCellValue('G' . $row, strtoupper($turno->prioridad));
-            $sheet->setCellValue('H' . $row, $turno->fecha_creacion ? Carbon::parse($turno->fecha_creacion)->format('d/m/Y H:i:s') : 'N/A');
+            $sheet->setCellValue('G' . $row, $turno->prioridad >= 4 ? 'Prioritario' : 'Normal');
+            $sheet->setCellValue('H' . $row, $turno->created_at ? Carbon::parse($turno->created_at)->format('d/m/Y H:i:s') : 'N/A');
             $sheet->setCellValue('I' . $row, $turno->fecha_llamado ? Carbon::parse($turno->fecha_llamado)->format('d/m/Y H:i:s') : 'N/A');
             $sheet->setCellValue('J' . $row, $turno->fecha_atencion ? Carbon::parse($turno->fecha_atencion)->format('d/m/Y H:i:s') : 'N/A');
             $sheet->setCellValue('K' . $row, $this->formatearDuracionSegundos($turno->duracion_atencion));
