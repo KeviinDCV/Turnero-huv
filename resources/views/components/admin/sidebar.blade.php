@@ -53,8 +53,8 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo Hospital Universitario del Valle" class="w-full h-full object-contain">
                 </span>
                 <span class="min-w-0 sidebar-label" x-show="!sidebarCollapsed">
-                    <span class="block text-base font-semibold leading-tight truncate">Turnero HUV</span>
-                    <span class="block leading-tight truncate" style="color: #9db8dd; font-size: 10px;">Panel administrativo</span>
+                    <span class="sidebar-brand-name block leading-tight truncate">Turnero HUV</span>
+                    <span class="sidebar-brand-unit block leading-tight truncate">{{ config('panel.unidad_nombre', 'Panel administrativo') }}</span>
                 </span>
             </a>
 
@@ -78,16 +78,11 @@
 
     <!-- Usuario conectado -->
     <div class="sidebar-user flex-shrink-0" style="border-bottom: 1px solid rgba(255,255,255,0.10);">
-        <div class="flex items-center gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16);">
-                <span class="text-sm font-semibold text-white">{{ $userInitial }}</span>
-            </div>
+        <div class="sidebar-user-card flex items-center gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
+            <span class="sidebar-avatar" aria-hidden="true">{{ $userInitial }}</span>
             <div class="min-w-0 sidebar-label" x-show="!sidebarCollapsed">
-                <p class="text-sm font-medium truncate text-white">{{ $displayName }}</p>
-                <p class="text-xs truncate flex items-center mt-0.5" style="color: #9db8dd;">
-                    <span class="w-1.5 h-1.5 rounded-full mr-1.5 flex-shrink-0" style="background: #34d399;"></span>
-                    {{ $user->rol ?? 'Sin rol' }}
-                </p>
+                <p class="sidebar-user-name truncate">{{ $displayName }}</p>
+                <p class="sidebar-user-role truncate">{{ $user->rol ?? 'Sin rol' }}</p>
             </div>
         </div>
     </div>
@@ -153,9 +148,9 @@
 
     <!-- Footer -->
     <div class="sidebar-footer flex-shrink-0" style="border-top: 1px solid rgba(255,255,255,0.10);">
-        <div class="sidebar-label" x-show="!sidebarCollapsed">
-            <div class="font-semibold text-white leading-tight truncate" style="font-size: 10px;">"Evaristo García" E.S.E</div>
-            <div class="leading-tight truncate" style="color: #9db8dd; font-size: 10px;">Innovación y Desarrollo</div>
+        <div class="sidebar-label sidebar-firma" x-show="!sidebarCollapsed">
+            <div class="sidebar-firma-titulo truncate">"Evaristo García" E.S.E</div>
+            <div class="sidebar-firma-sub truncate">Innovación y Desarrollo</div>
         </div>
 
         <form method="POST" action="{{ route('logout') }}">

@@ -13,6 +13,9 @@
 
 return [
 
+    // Nombre de la unidad: se muestra bajo "Turnero HUV" en el menú lateral.
+    'unidad_nombre' => env('PANEL_UNIDAD_NOMBRE', 'Fisiatría'),
+
     // Nombre corto de la unidad.
     'unidad' => env('PANEL_UNIDAD', 'Fisiatría'),
 

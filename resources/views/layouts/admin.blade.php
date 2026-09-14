@@ -636,6 +636,48 @@
             outline-color: #064b9e;
         }
         .sidebar-header a:focus-visible { outline-offset: 3px; border-radius: 10px; }
+        /* 4. Acabado: la letra Inter de verdad (el tema la declaraba y nunca se cargaba; se veía Segoe UI),
+              ficha de usuario, filetes en las secciones y el azul institucional en el ítem activo. */
+        @font-face {
+            font-family: 'Inter';
+            src: url('{{ asset('fonts/InterVariable.woff2') }}') format('woff2');
+            font-weight: 100 900; font-style: normal; font-display: swap;
+        }
+        html { font-feature-settings: 'cv05' 1; }   /* l minúscula con cola: "lcruz" ya no se lee "Icruz" */
+
+        .sidebar-shell { box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06); }
+        .sidebar-brand-name { color: #ffffff; font-size: 1.0625rem; font-weight: 650; letter-spacing: -0.01em; }
+        .sidebar-brand-unit { color: #9db8dd; font-size: 11px; margin-top: 2px; }
+        @media (max-width: 1399px) { .sidebar-brand-unit { font-size: 10px; } }   /* menú de 256 px: "Unidad Básica de Atención" cabe entero */
+
+        .sidebar-user { padding-left: .75rem; padding-right: .75rem; }
+        .sidebar-user-card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: .5rem .75rem; }
+        .sidebar-avatar {
+            width: 2.125rem; height: 2.125rem; flex-shrink: 0; border-radius: 9999px;
+            display: grid; place-items: center;
+            background: #064b9e; color: #ffffff; font-size: .875rem; font-weight: 600;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14);
+        }
+        .sidebar-user-name { color: #ffffff; font-size: .875rem; font-weight: 600; line-height: 1.3; }
+        .sidebar-user-role { color: #9db8dd; font-size: .75rem; line-height: 1.3; margin-top: 1px; }
+        body.sidebar-is-collapsed .sidebar-user-card { background: transparent; padding: 0; }
+
+        .sidebar-section-title { display: flex; align-items: center; gap: .5rem; padding-right: .75rem; }
+        .sidebar-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.09); }
+
+        .sidebar-item { color: #c4d2e7; }
+        .sidebar-item svg { color: #8ea8d0; transition: color .15s ease; }
+        .sidebar-item:hover svg,
+        .sidebar-item:focus-visible svg { color: #ffffff; }
+        .sidebar-item-active,
+        .sidebar-item-active:hover { color: #072449; box-shadow: inset 3px 0 0 #064b9e; }
+        .sidebar-item-active svg,
+        .sidebar-item-active:hover svg { color: #064b9e; }
+        .sidebar-item-active .sidebar-label { font-weight: 600; }
+        body.sidebar-is-collapsed .sidebar-item-active { box-shadow: none; }
+
+        .sidebar-firma-titulo { color: #e4ebf5; font-size: 11px; font-weight: 600; line-height: 1.35; }
+        .sidebar-firma-sub { color: #8ea8d0; font-size: 11px; line-height: 1.35; }
     </style>
 </head>
 <body class="min-h-screen bg-gray-100"
