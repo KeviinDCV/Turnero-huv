@@ -73,7 +73,7 @@
         /* Titulos de seccion: mas pequenos y con mas caracter, para que se lean
            como etiquetas de grupo y no compitan con los enlaces. */
         .sidebar-section-title {
-            color: #5f7ba6;
+            color: #718eba;  /* 4,63:1 sobre #072449 (antes #5f7ba6 = 3,59:1, no llegaba a AA) */
             font-size: 0.6rem;
             font-weight: 700;
             letter-spacing: 0.09em;
@@ -330,13 +330,6 @@
                 margin-left: 14rem !important;
             }
 
-            /* Hacer elementos más compactos */
-            .sidebar-header {
-                padding: 0.75rem !important;
-            }
-            .sidebar-nav {
-                padding: 0.5rem !important;
-            }
             .header-responsive {
                 padding: 0.5rem 1rem !important;
             }
@@ -381,11 +374,6 @@
             .sidebar-responsive { transition: width 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
             .header-responsive  { transition: left 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
             .main-content       { transition: margin-left 0.24s cubic-bezier(0.4, 0, 0.2, 1); }
-        }
-
-        /* Micro-interacción: desplazamiento sutil al pasar el cursor (excepto el activo) */
-        .sidebar-item:not(.sidebar-item-active):hover {
-            transform: translateX(2px);
         }
 
         /* Ícono del ítem: leve realce al pasar el cursor y sombra en el activo */
@@ -453,179 +441,12 @@
             display: none !important;
         }
 
-        /* ===== RESPONSIVE DESIGN IMPROVEMENTS ===== */
-
-        /* Mejoras para resoluciones pequeñas */
-        @media (max-height: 800px) {
-            /* Reducir padding general */
-            .dashboard-container {
-                padding: 0.75rem !important;
-            }
-
-            /* Reducir espaciado entre secciones */
-            .dashboard-section {
-                margin-top: 1.5rem !important;
-            }
-
-            /* Tablas más compactas */
-            .dashboard-table th,
-            .dashboard-table td {
-                padding: 0.5rem !important;
-                font-size: 0.875rem !important;
-            }
-
-            /* Títulos más pequeños */
-            .dashboard-title {
-                font-size: 1rem !important;
-                margin-bottom: 0.75rem !important;
-            }
-
-            /* Botones más compactos */
-            .dashboard-button {
-                padding: 0.5rem 1rem !important;
-                font-size: 0.875rem !important;
-            }
-
-            /* Badges más pequeños */
-            .dashboard-badge {
-                padding: 0.25rem 0.5rem !important;
-                font-size: 0.75rem !important;
-            }
-        }
-
-        @media (max-height: 700px) {
-            /* Para pantallas muy pequeñas */
-            .dashboard-container {
-                padding: 0.5rem !important;
-            }
-
-            .dashboard-section {
-                margin-top: 1rem !important;
-            }
-
-            .dashboard-table th,
-            .dashboard-table td {
-                padding: 0.375rem !important;
-                font-size: 0.8rem !important;
-            }
-
-            .dashboard-title {
-                font-size: 0.9rem !important;
-                margin-bottom: 0.5rem !important;
-            }
-
-            /* Iconos más pequeños */
-            .dashboard-icon {
-                width: 2.5rem !important;
-                height: 2.5rem !important;
-            }
-
-            .dashboard-icon svg {
-                width: 1.25rem !important;
-                height: 1.25rem !important;
-            }
-        }
-
-        /* Reglas de tabla responsive - sin conflicto con sidebar */
-        @media (max-width: 1400px) {
-            .dashboard-table th,
-            .dashboard-table td {
-                font-size: 0.875rem !important;
-                padding: 0.5rem !important;
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .dashboard-table th,
-            .dashboard-table td {
-                font-size: 0.8rem !important;
-                padding: 0.375rem !important;
-            }
-        }
-
-        /* Mejoras específicas para resolución 1366x768 */
-        @media (max-width: 1366px) and (max-height: 768px) {
-            .dashboard-container {
-                padding: 0.75rem !important;
-            }
-
-            .dashboard-section {
-                margin-top: 1.25rem !important;
-            }
-
-            .dashboard-table th,
-            .dashboard-table td {
-                font-size: 0.8rem !important;
-                padding: 0.375rem !important;
-            }
-
-            .dashboard-title {
-                font-size: 1rem !important;
-                margin-bottom: 0.75rem !important;
-            }
-
-            .dashboard-button {
-                padding: 0.5rem 0.875rem !important;
-                font-size: 0.8rem !important;
-            }
-
-            .dashboard-badge {
-                padding: 0.25rem 0.5rem !important;
-                font-size: 0.7rem !important;
-            }
-
-            /* Header más compacto */
-            .header-responsive {
-                padding: 0.5rem 1rem !important;
-            }
-
-            .header-title {
-                font-size: 1.25rem !important;
-            }
-
-            /* Sidebar más compacta - ancho controlado por reglas principales */
-
-            .sidebar-header {
-                padding: 1rem !important;
-            }
-
-            .sidebar-user {
-                padding: 0.75rem !important;
-            }
-
-            .sidebar-nav {
-                padding: 0.75rem !important;
-            }
-
-            .sidebar-item {
-                padding: 0.5rem 0.75rem !important;
-                font-size: 0.875rem !important;
-            }
-        }
-
         /* Asegurar que los elementos no se desborden */
         * {
             box-sizing: border-box;
         }
 
-        /* Mejorar legibilidad en pantallas muy pequeñas */
-        @media (max-height: 600px) {
-            .dashboard-container {
-                padding: 0.5rem !important;
-            }
-
-            .dashboard-section {
-                margin-top: 0.75rem !important;
-            }
-
-            .dashboard-table th,
-            .dashboard-table td {
-                font-size: 0.75rem !important;
-                padding: 0.25rem !important;
-            }
-        }
-
-        @media (min-width: 768px) {
+@media (min-width: 768px) {
             body.sidebar-is-collapsed .sidebar-responsive {
                 width: var(--sidebar-collapsed-width) !important;
             }
@@ -742,6 +563,80 @@
 
         @yield('styles')
     </style>
+    <style>
+        /* ================= EVOLUCIÓN 2026-09: menú lateral y barra =================
+           Una sola medida para la barra y el contenido, densidad del menú según la ALTURA de la
+           pantalla (en 1366x768 la pestaña activa seguía conectada y las 3 secciones caben), y
+           hover/foco coherentes. Sin clases nuevas de Tailwind: no requiere npm run build. */
+        /* 1. Barra superior y contenido comparten UNA medida.
+              Antes: la barra medía 52 px (44 px en 1366x768) y el <main> tenía
+              pt-16 (64 px) fijo -> franja gris vacía de 12-20 px bajo la barra. */
+        :root { --admin-header-h: 3.25rem; }                       /* 52 px */
+        .header-responsive { height: var(--admin-header-h); padding-top: 0; padding-bottom: 0; }
+        .main-content { padding-top: var(--admin-header-h); min-width: 0; }  /* min-width: 0 -> una tabla ancha ya no estira el <main> fuera de la pantalla */
+
+        /* 2. Sidebar: las medidas verticales pasan a variables. La densidad
+              cambia SOLO con la ALTURA de la pantalla; el ancho (256/288 px) y
+              la pestaña conectada no se tocan en ningún tamaño. */
+        .sidebar-shell {
+            --sb-borde: 1.5rem;        /* 24 px: borde izquierdo común de logo, avatar, títulos, pestaña y pie */
+            --sb-item-h: 42px;         /* alto de cada ítem (el min-h-[42px] de siempre) */
+            --sb-grupo: 1rem;          /* aire entre secciones (el space-y-4 de siempre) */
+            --sb-titulo: .375rem;      /* título de sección -> primer ítem */
+            --sb-cabeza-py: 1rem;
+            --sb-bloque-py: .75rem;
+        }
+        .sidebar-header { padding: var(--sb-cabeza-py) .75rem var(--sb-cabeza-py) var(--sb-borde); }
+        .sidebar-user   { padding: var(--sb-bloque-py) 1rem var(--sb-bloque-py) var(--sb-borde); }
+        .sidebar-nav > nav { padding-top: .75rem; padding-bottom: 1.25rem; }
+        .sidebar-nav > nav > div + div { margin-top: var(--sb-grupo); }
+        .sidebar-section-title { margin-bottom: var(--sb-titulo); }
+        .sidebar-item,
+        .sidebar-logout { min-height: var(--sb-item-h); }
+        /* Pie: "Cerrar sesión" arranca donde arranca la pestaña (24 px) y su ícono
+           cae en la misma columna que los íconos del menú (36 px). */
+        .sidebar-footer { padding: var(--sb-bloque-py) .75rem var(--sb-bloque-py) var(--sb-borde); }
+        .sidebar-footer > .sidebar-label { padding-bottom: .5rem; }
+
+        /* Alturas medianas: 720-799 px útiles (1536x864, 1600x900, 1440x900 con barra de tareas) */
+        @media (min-width: 768px) and (max-height: 799px) {
+            :root { --admin-header-h: 2.75rem; }                   /* 44 px, como ya hacía la barra en 1366x768 */
+            .sidebar-shell { --sb-item-h: 38px; --sb-grupo: .75rem; --sb-cabeza-py: .75rem; --sb-bloque-py: .625rem; }
+            .sidebar-nav > nav { padding-top: .5rem; padding-bottom: .75rem; }
+        }
+        /* Alturas cortas: hasta 719 px útiles (1366x768 real ≈ 650, 1280x800 ≈ 680, 1024x768).
+           Las 3 secciones y "Soporte" quedan a la vista sin scroll a 650 px. */
+        @media (min-width: 768px) and (max-height: 719px) {
+            .sidebar-shell { --sb-item-h: 34px; --sb-grupo: .5rem; --sb-titulo: .25rem; --sb-cabeza-py: .625rem; --sb-bloque-py: .5rem; }
+            .sidebar-nav > nav { padding-top: .375rem; padding-bottom: .5rem; }
+            .sidebar-footer > .sidebar-label { padding-bottom: .25rem; }
+        }
+
+        /* Modo compacto (72 px): avatar y "Cerrar sesión" vuelven a centrarse. */
+        body.sidebar-is-collapsed .sidebar-user,
+        body.sidebar-is-collapsed .sidebar-footer { padding-left: .75rem; padding-right: .75rem; }
+
+        /* 3. Hover y foco de teclado: un solo lenguaje para ítems, "Cerrar sesión"
+              y el botón de plegar (antes este último usaba onmouseover en línea y
+              no tenía foco visible). Sin desplazamientos: la pestaña llega al
+              borde y moverla 2 px la desconectaba del contenido. */
+        .sidebar-toggle { color: #9db8dd; }
+        .sidebar-toggle:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+        .sidebar-shell a:focus-visible,
+        .sidebar-shell button:focus-visible,
+        .header-responsive button:focus-visible {
+            outline: 2px solid #9db8dd;
+            outline-offset: -2px;
+        }
+        .sidebar-item:focus-visible,
+        .sidebar-logout:focus-visible { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+        .sidebar-shell .sidebar-item-active:focus-visible {
+            background: var(--color-gray-100, #f3f4f6);
+            color: #072449;
+            outline-color: #064b9e;
+        }
+        .sidebar-header a:focus-visible { outline-offset: 3px; border-radius: 10px; }
+    </style>
 </head>
 <body class="min-h-screen bg-gray-100"
       x-data="{ sidebarOpen: false, sidebarCollapsed: window.innerWidth >= 768 && localStorage.getItem('huvSidebarCollapsed') === '1' }"
@@ -765,7 +660,7 @@
         @include('components.admin.sidebar')
 
         <!-- Main Content -->
-        <main id="main-content" tabindex="-1" class="flex-1 main-content pt-16">
+        <main id="main-content" tabindex="-1" class="flex-1 main-content">
             <div class="p-4 md:p-6">
                 @yield('content')
             </div>
