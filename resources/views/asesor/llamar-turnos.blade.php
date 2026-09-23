@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Llamado de Turnos - Hospital Universitario del Valle</title>
+    {{-- Avisos: toasts de sileo.js (port sin React de Sileo); antes que el resto de scripts --}}
+    <script src="{{ asset('js/sileo.js') }}?v={{ is_file(public_path('js/sileo.js')) ? filemtime(public_path('js/sileo.js')) : 0 }}" defer></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <style>
@@ -439,7 +441,6 @@
         }
 
         /* Modales: esquinas más suaves */
-        #notification-modal > div,
         #canal-no-presencial-modal > div,
         #modal-aplazados > div,
         #confirmar-finalizar-modal > div {
@@ -665,26 +666,6 @@
         </div>
     </div>
 
-    <!-- Modal para notificaciones -->
-    <div id="notification-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl animate-fade-in">
-            <div class="text-center">
-                <div id="modal-icon" class="mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center">
-                    <svg id="success-icon" class="w-6 h-6 text-green-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <svg id="error-icon" class="w-6 h-6 text-red-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </div>
-                <h3 id="modal-title" class="text-lg font-medium text-gray-900 mb-2"></h3>
-                <p id="modal-message" class="text-gray-600 mb-4"></p>
-                <button id="modal-close" class="px-4 py-2 text-white rounded-md transition-colors duration-200" style="background-color: #064b9e;">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Modal para Canal No Presencial -->
     <div id="canal-no-presencial-modal" role="dialog" aria-modal="true" aria-labelledby="canal-no-presencial-modal-title" class="fixed inset-0 hidden items-center justify-center z-50 backdrop-blur-sm bg-black/30">
@@ -1076,70 +1057,16 @@
             configurarEventosServiciosDesplegables();
         }
 
-        // Modal
-        const modal = document.getElementById('notification-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalIcon = document.getElementById('modal-icon');
-        const successIcon = document.getElementById('success-icon');
-        const errorIcon = document.getElementById('error-icon');
-        const modalClose = document.getElementById('modal-close');
-
-        // Función para mostrar notificaciones
-        function showNotification(title, message, type = 'success') {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            
-            // Ocultar todos los iconos primero
-            successIcon.classList.add('hidden');
-            errorIcon.classList.add('hidden');
-            
-            // Mostrar el icono apropiado
-            if (type === 'success') {
-                successIcon.classList.remove('hidden');
-                modalIcon.classList.remove('bg-red-100');
-                modalIcon.classList.add('bg-green-100');
-            } else {
-                errorIcon.classList.remove('hidden');
-                modalIcon.classList.remove('bg-green-100');
-                modalIcon.classList.add('bg-red-100');
-            }
-            
-            // Mostrar modal
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+        // Avisos: toasts de sileo.js (abajo a la derecha). El título va en la píldora y el detalle se despliega debajo;
+        // los errores duran un poco más. mostrarModal y showNotification conservan su nombre para no tocar cada llamado.
+        function avisar(titulo, mensaje, tipo = 'success') {
+            const texto = String(titulo || '');
+            const opciones = { title: texto.charAt(0) + texto.slice(1).toLowerCase(), description: mensaje || undefined }; // "Turno Llamado" → "Turno llamado"
+            if (tipo === 'success') sileo.success(opciones);
+            else sileo.error(Object.assign(opciones, { duration: 8000 }));
         }
-
-        // Funciones del modal
-        function mostrarModal(titulo, mensaje, tipo = 'success') {
-            modalTitle.textContent = titulo;
-            modalMessage.textContent = mensaje;
-
-            if (tipo === 'success') {
-                modalIcon.className = 'mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center bg-green-100';
-                successIcon.classList.remove('hidden');
-                errorIcon.classList.add('hidden');
-            } else {
-                modalIcon.className = 'mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center bg-red-100';
-                successIcon.classList.add('hidden');
-                errorIcon.classList.remove('hidden');
-            }
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function cerrarModal() {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        modalClose.addEventListener('click', cerrarModal);
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                cerrarModal();
-            }
-        });
+        function mostrarModal(titulo, mensaje, tipo = 'success') { avisar(titulo, mensaje, tipo); }
+        function showNotification(title, message, type = 'success') { avisar(title, message, type); }
 
         // Función para actualizar la interfaz con el turno actual
         function actualizarInterfazTurno(turno) {
@@ -1458,12 +1385,12 @@
                     actualizarEstadisticasServicios(); // Actualizar estadísticas
                 } else {
                     console.error('❌ Error al marcar como atendido:', data.message);
-                    alert('Error: ' + data.message);
+                    mostrarModal('No se marcó como atendido', data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('❌ Error en petición:', error);
-                alert('Error de conexión');
+                mostrarModal('No se marcó como atendido', 'No hay conexión con el servidor.', 'error');
             });
         }
 
@@ -1496,12 +1423,12 @@
                     actualizarEstadisticasServicios(); // Actualizar estadísticas
                 } else {
                     console.error('❌ Error al aplazar:', data.message);
-                    alert('Error: ' + data.message);
+                    mostrarModal('No se aplazó el turno', data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('❌ Error en petición:', error);
-                alert('Error de conexión');
+                mostrarModal('No se aplazó el turno', 'No hay conexión con el servidor.', 'error');
             });
         }
 
@@ -1547,7 +1474,7 @@
             .then(data => {
                 if (data.success) {
                     cerrarModalCanalNoPresencial();
-                    showNotification('Éxito', 'Actividad de canal no presencial iniciada. Su estado cambiará a "No disponible"', 'success');
+                    showNotification('Canal no presencial iniciado', 'Su estado cambiará a "No disponible" mientras dure la actividad.', 'success');
                     
                     // Actualizar bandera
                     enCanalNoPresencial = true;
@@ -1603,7 +1530,7 @@
             .then(data => {
                 if (data.success) {
                     cerrarModalConfirmarFinalizar();
-                    showNotification('Éxito', 'Actividad de canal no presencial finalizada. Ya está disponible nuevamente', 'success');
+                    showNotification('Canal no presencial finalizado', 'Ya está disponible nuevamente.', 'success');
                     
                     // Actualizar bandera
                     enCanalNoPresencial = false;
@@ -1665,15 +1592,15 @@
                 if (data.success) {
                     console.log('🔊 Turno vuelto a llamar');
                     // No necesitamos recargar el historial, solo confirmar
-                    alert('Turno vuelto a llamar correctamente');
+                    mostrarModal('Turno llamado de nuevo', codigoCompleto + ' se anunció otra vez en el televisor.');
                 } else {
                     console.error('❌ Error al volver a llamar:', data.message);
-                    alert('Error: ' + data.message);
+                    mostrarModal('No se volvió a llamar', data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('❌ Error en petición:', error);
-                alert('Error de conexión');
+                mostrarModal('No se volvió a llamar', 'No hay conexión con el servidor.', 'error');
             });
         }
 
@@ -1885,7 +1812,7 @@
         // Cerrar con la tecla Escape el modal que esté visible
         document.addEventListener('keydown', function(e) {
             if (e.key !== 'Escape') return;
-            ['notification-modal', 'canal-no-presencial-modal', 'modal-aplazados', 'confirmar-finalizar-modal'].forEach(function(id) {
+            ['canal-no-presencial-modal', 'modal-aplazados', 'confirmar-finalizar-modal'].forEach(function(id) {
                 const modalEl = document.getElementById(id);
                 if (modalEl && !modalEl.classList.contains('hidden')) {
                     modalEl.classList.remove('flex');
