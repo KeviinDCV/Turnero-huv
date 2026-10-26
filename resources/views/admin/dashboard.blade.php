@@ -1048,22 +1048,27 @@ function abrirModalEstadisticas(userId, nombreUsuario) {
 }
 
 // Componente Alpine.js para el modal de estadísticas
+// AAAA-MM-DD en la hora local del equipo: la fecha en UTC, de noche, ya es la de mañana.
+function fechaLocalISO(d = new Date()) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
 function estadisticasUsuarioModal() {
     return {
         isOpen: false,
         loading: false,
         usuarioId: null,
         usuarioNombre: '',
-        fechaInicio: new Date().toISOString().split('T')[0],
-        fechaFin: new Date().toISOString().split('T')[0],
+        fechaInicio: fechaLocalISO(),
+        fechaFin: fechaLocalISO(),
 
         init() {
             window.addEventListener('open-estadisticas-modal', (event) => {
                 const { userId, nombreUsuario } = event.detail;
                 this.usuarioId = userId;
                 this.usuarioNombre = nombreUsuario;
-                this.fechaInicio = new Date().toISOString().split('T')[0];
-                this.fechaFin = new Date().toISOString().split('T')[0];
+                this.fechaInicio = fechaLocalISO();
+                this.fechaFin = fechaLocalISO();
                 this.isOpen = true;
                 this.cargarEstadisticas();
             });
@@ -1094,8 +1099,8 @@ function estadisticasUsuarioModal() {
                     break;
             }
             
-            this.fechaInicio = fechaInicio.toISOString().split('T')[0];
-            this.fechaFin = fechaFin.toISOString().split('T')[0];
+            this.fechaInicio = fechaLocalISO(fechaInicio);
+            this.fechaFin = fechaLocalISO(fechaFin);
             this.cargarEstadisticas();
         },
 
@@ -1163,7 +1168,8 @@ function estadisticasUsuarioModal() {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             <div>
-                                <p class="text-lg font-semibold text-gray-800">${est.tiempo_promedio_atencion} min</p>
+                                <p class="text-lg font-semibold text-gray-800">${est.tiempo_promedio_atencion}</p>
+                                ${est.atenciones_atipicas ? `<p class="text-xs text-gray-500">sin ${est.atenciones_atipicas} de más de 1 h (quedaron abiertas)</p>` : ''}
                                 <p class="text-xs text-gray-500">Tiempo Prom. Atención</p>
                             </div>
                         </div>
@@ -1174,7 +1180,7 @@ function estadisticasUsuarioModal() {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                             <div>
-                                <p class="text-lg font-semibold text-gray-800">${est.tiempo_total_atencion} min</p>
+                                <p class="text-lg font-semibold text-gray-800">${est.tiempo_total_atencion}</p>
                                 <p class="text-xs text-gray-500">Tiempo Total</p>
                             </div>
                         </div>
@@ -1185,7 +1191,8 @@ function estadisticasUsuarioModal() {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                             <div>
-                                <p class="text-lg font-semibold text-gray-800">${est.tiempo_promedio_entre_turnos} min</p>
+                                <p class="text-lg font-semibold text-gray-800">${est.tiempo_promedio_entre_turnos}</p>
+                                ${est.pausas_largas ? `<p class="text-xs text-gray-500">${est.pausas_largas} pausas de más de 1 h, aparte</p>` : ''}
                                 <p class="text-xs text-gray-500">Tiempo Entre Turnos</p>
                             </div>
                         </div>
@@ -1226,7 +1233,7 @@ function estadisticasUsuarioModal() {
                                     <tr class="hover:bg-gray-50">
                                         <td class="py-2 px-2">${a.actividad}</td>
                                         <td class="py-2 px-2">${a.inicio}</td>
-                                        <td class="py-2 px-2">${a.duracion_minutos} min</td>
+                                        <td class="py-2 px-2">${a.duracion_minutos === null ? 'Abierta de un día a otro (no se suma)' : a.duracion_minutos + ' min'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -1281,7 +1288,7 @@ function estadisticasUsuarioModal() {
                                         <td class="py-2 px-2 font-medium">${t.codigo}</td>
                                         <td class="py-2 px-2">${t.servicio}</td>
                                         <td class="py-2 px-2">${t.fecha_atencion}</td>
-                                        <td class="py-2 px-2">${t.duracion_minutos} min</td>
+                                        <td class="py-2 px-2">${t.duracion_minutos}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>

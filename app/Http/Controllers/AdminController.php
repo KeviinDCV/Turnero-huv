@@ -949,14 +949,29 @@ class AdminController extends Controller
             ? Carbon::parse($request->fecha_fin)->endOfDay() 
             : Carbon::today()->endOfDay();
 
-        // Obtener turnos del usuario en el rango de fechas
+        // Mismo criterio que los informes: el periodo es por la hora real de llegada (created_at);
+        // fecha_creacion se reescribe en cada cambio del turno.
         $turnos = Turno::with(['servicio', 'caja'])
             ->where('asesor_id', $userId)
-            ->whereBetween('fecha_creacion', [$fechaInicio, $fechaFin])
-            ->orderBy('fecha_creacion', 'desc')
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $turnosAtendidos = $turnos->where('estado', 'atendido');
+        // IMPORTANTE: ->values() re-indexa las claves para que JSON serialice como array []
+        // Sin values(), las claves no-secuenciales (0,2,5,8...) generan un objeto {} en JSON
+        // y en JavaScript {}.length === undefined, causando "No hay turnos atendidos"
+        $turnosAtendidos = $turnos->where('estado', 'atendido')->values();
+
+        // Canales no presenciales (también se descuentan del tiempo entre turnos: es trabajo)
+        $canalesNoPresenciales = \App\Models\CanalNoPresencialHistorial::where('user_id', $userId)
+            ->whereBetween('inicio', [$fechaInicio, $fechaFin])
+            ->orderBy('inicio', 'desc')
+            ->get();
+
+        // Tiempos con las reglas de los informes (MetricasTurnos): sin atenciones que quedaron abiertas,
+        // y el tiempo entre turnos solo dentro del mismo día.
+        $atencion = \App\Services\MetricasTurnos::atencion($turnosAtendidos);
+        $entre = \App\Services\MetricasTurnos::entreTurnos($turnosAtendidos, $canalesNoPresenciales);
 
         // Estadísticas generales
         $estadisticas = [
@@ -965,31 +980,16 @@ class AdminController extends Controller
             'turnos_pendientes' => $turnos->whereIn('estado', ['pendiente', 'aplazado'])->count(),
             'turnos_aplazados' => $turnos->where('estado', 'aplazado')->count(),
             'turnos_cancelados' => $turnos->where('estado', 'cancelado')->count(),
-            'tiempo_promedio_atencion' => $turnosAtendidos->count() > 0 
-                ? round($turnosAtendidos->avg('duracion_atencion') / 60, 2) 
-                : 0,
-            'tiempo_total_atencion' => round($turnosAtendidos->sum('duracion_atencion') / 60, 2),
+            'tiempo_promedio_atencion' => \App\Services\MetricasTurnos::texto($atencion['promedio']),
+            'tiempo_total_atencion' => \App\Services\MetricasTurnos::texto($atencion['total']),
+            'atenciones_atipicas' => $atencion['atipicas'],
+            'tiempo_promedio_entre_turnos' => \App\Services\MetricasTurnos::texto($entre['promedio']),
+            'tiempo_total_entre_turnos' => \App\Services\MetricasTurnos::texto($entre['total']),
+            'pausas_largas' => $entre['pausas'],
         ];
 
-        // Calcular tiempo promedio entre turnos
-        $turnosOrdenados = $turnosAtendidos->sortBy('fecha_atencion')->values();
-        $tiemposEntreTurnos = [];
-        for ($i = 1; $i < $turnosOrdenados->count(); $i++) {
-            $anterior = $turnosOrdenados[$i - 1];
-            $actual = $turnosOrdenados[$i];
-            
-            if ($anterior->fecha_finalizacion && $actual->fecha_llamado) {
-                $minutos = Carbon::parse($anterior->fecha_finalizacion)
-                    ->diffInMinutes(Carbon::parse($actual->fecha_llamado));
-                $tiemposEntreTurnos[] = $minutos;
-            }
-        }
-        $estadisticas['tiempo_promedio_entre_turnos'] = count($tiemposEntreTurnos) > 0 
-            ? round(array_sum($tiemposEntreTurnos) / count($tiemposEntreTurnos), 2) 
-            : 0;
-
         // Turnos por servicio
-        $turnosPorServicio = $turnos->groupBy('servicio.nombre')->map(function ($grupo) {
+        $turnosPorServicio = $turnos->groupBy(fn ($turno) => $turno->servicio->nombre ?? 'Servicio eliminado')->map(function ($grupo) {
             return [
                 'total' => $grupo->count(),
                 'atendidos' => $grupo->where('estado', 'atendido')->count(),
@@ -999,7 +999,7 @@ class AdminController extends Controller
 
         // Turnos por día (para gráfico)
         $turnosPorDia = $turnos->groupBy(function ($turno) {
-            return Carbon::parse($turno->fecha_creacion)->format('Y-m-d');
+            return Carbon::parse($turno->created_at)->format('Y-m-d');
         })->map(function ($grupo) {
             return [
                 'total' => $grupo->count(),
@@ -1007,13 +1007,8 @@ class AdminController extends Controller
             ];
         });
 
-        // Canales no presenciales
-        $canalesNoPresenciales = \App\Models\CanalNoPresencialHistorial::where('user_id', $userId)
-            ->whereBetween('inicio', [$fechaInicio, $fechaFin])
-            ->orderBy('inicio', 'desc')
-            ->get();
-
-        $totalMinutosCanal = $canalesNoPresenciales->sum('duracion_minutos');
+        // Las actividades que quedaron abiertas de un día para otro no se suman, como en los informes.
+        $totalMinutosCanal = (int) round($canalesNoPresenciales->sum(fn ($actividad) => \App\Services\MetricasTurnos::duracionCanal($actividad) ?? 0) / 60);
 
         // Detalle de turnos (últimos 20)
         $turnosDetalle = $turnosAtendidos->take(20)->map(function ($turno) {
@@ -1026,12 +1021,10 @@ class AdminController extends Controller
                 'fecha_atencion' => $turno->fecha_atencion 
                     ? Carbon::parse($turno->fecha_atencion)->format('d/m/Y H:i:s') 
                     : 'N/A',
-                'fecha_finalizacion' => $turno->fecha_finalizacion 
-                    ? Carbon::parse($turno->fecha_finalizacion)->format('d/m/Y H:i:s') 
+                'fecha_finalizacion' => $turno->fecha_atencion
+                    ? Carbon::parse($turno->fecha_atencion)->format('d/m/Y H:i:s')
                     : 'N/A',
-                'duracion_minutos' => $turno->duracion_atencion 
-                    ? round($turno->duracion_atencion / 60, 2) 
-                    : 0,
+                'duracion_minutos' => \App\Services\MetricasTurnos::texto(\App\Services\MetricasTurnos::duracion($turno)),
                 'caja' => $turno->caja->numero_caja ?? 'N/A',
             ];
         });
@@ -1041,7 +1034,8 @@ class AdminController extends Controller
             return [
                 'inicio' => $actividad->inicio->format('d/m/Y H:i:s'),
                 'fin' => $actividad->fin ? $actividad->fin->format('d/m/Y H:i:s') : 'En curso',
-                'duracion_minutos' => $actividad->duracion_minutos ?? 0,
+                // null = quedó abierta de un día para otro (no se suma, como en los informes)
+                'duracion_minutos' => ($segundos = \App\Services\MetricasTurnos::duracionCanal($actividad)) === null ? null : (int) round($segundos / 60),
                 'actividad' => $actividad->actividad,
             ];
         });
@@ -1066,7 +1060,7 @@ class AdminController extends Controller
                 'tiempo_total_horas' => round($totalMinutosCanal / 60, 2),
                 'detalle' => $canalesDetalle,
             ],
-            'turnos_detalle' => $turnosDetalle,
+            'turnos_detalle' => $turnosDetalle->values(),
         ]);
     }
 
@@ -1155,7 +1149,8 @@ class AdminController extends Controller
             $esperando = in_array($t->estado, ['pendiente', 'aplazado'], true);
             $espera = $minutos($t->created_at, $esperando ? $ahora : $t->fecha_llamado);
             $limite = $prioritario ? $umbrales['prioritario'] : $umbrales['espera'];
-            $duracion = $t->duracion_atencion !== null ? abs((int) $t->duracion_atencion) : null;
+            // Solo los atendidos tienen una atención que medir; misma regla que los informes (MetricasTurnos).
+            $duracion = $t->estado === 'atendido' ? \App\Services\MetricasTurnos::duracion($t) : null;
 
             return [
                 'id' => $t->id,

@@ -4,27 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Turnos - Hospital Universitario del Valle</title>
-@php
-    if (!function_exists('formatearDuracionSegundos')) {
-        function formatearDuracionSegundos($segundos) {
-            if ($segundos === null || $segundos === '' || !is_numeric($segundos)) return 'N/A';
-            $segundos = (int) round((float) $segundos);
-            if ($segundos <= 0) return '0s';
-            $dias = intdiv($segundos, 86400);
-            $resto = $segundos % 86400;
-            $horas = intdiv($resto, 3600);
-            $resto = $resto % 3600;
-            $minutos = intdiv($resto, 60);
-            $segs = $resto % 60;
-            $partes = [];
-            if ($dias > 0) $partes[] = $dias.'d';
-            if ($horas > 0) $partes[] = $horas.'h';
-            if ($minutos > 0) $partes[] = $minutos.'m';
-            if ($segs > 0 && $dias === 0) $partes[] = $segs.'s';
-            return implode(' ', $partes) ?: '0s';
-        }
-    }
-@endphp
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,6 +47,16 @@
         
         .section {
             margin-bottom: 25px;
+        }
+        /* Las tablas largas se parten entre páginas (antes saltaban enteras y dejaban páginas casi vacías);
+           el encabezado de la tabla se repite y ninguna fila queda cortada. */
+        .section-title {
+            page-break-after: avoid;
+        }
+        thead {
+            display: table-header-group;
+        }
+        tr {
             page-break-inside: avoid;
         }
         
@@ -81,15 +70,17 @@
         }
         
         .summary-grid {
-            /* dompdf no entiende display:grid: dos columnas con inline-block */
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+        }
+        .summary-grid td {
+            width: 50%;
+            padding: 0 6px 8px 0;
+            border-bottom: none;
+            vertical-align: top;
+            background: #fff;
         }
         .summary-grid .summary-item {
-            display: inline-block;
-            box-sizing: border-box;
-            width: 47%;
-            margin: 0 2% 12px 0;
-            vertical-align: top;
+            padding: 9px 12px;
         }
         
         .summary-item {
@@ -109,6 +100,23 @@
             font-size: 18px;
             font-weight: bold;
             color: #333;
+        }
+        .summary-note {
+            font-size: 9px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .notas p {
+            font-size: 9px;
+            color: #555;
+            font-style: italic;
+            margin: 0 0 4px;
+        }
+        .tabla-asesores {
+            font-size: 9px;
+        }
+        .tabla-asesores th, .tabla-asesores td {
+            padding: 5px 4px;
         }
         
         table {
@@ -216,31 +224,42 @@
     <!-- Resumen General -->
     <div class="section">
         <div class="section-title">RESUMEN GENERAL</div>
-        <div class="summary-grid">
-            <div class="summary-item">
-                <div class="summary-label">Total de Turnos</div>
-                <div class="summary-value">{{ number_format($estadisticas['resumen']['total_turnos'], 0, ',', '.') }}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Turnos Atendidos</div>
-                <div class="summary-value">{{ number_format($estadisticas['resumen']['turnos_atendidos'], 0, ',', '.') }}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Turnos Pendientes</div>
-                <div class="summary-value">{{ number_format($estadisticas['resumen']['turnos_pendientes'], 0, ',', '.') }}</div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-label">Porcentaje de Atención</div>
-                <div class="summary-value">{{ number_format($estadisticas['resumen']['porcentaje_atencion'], 1, ',', '.') }} %</div>
-            </div>
+        @php
+            $r = $estadisticas['resumen'];
+            $cifra = fn ($n) => number_format($n ?? 0, 0, ',', '.');
+            $tarjetas = [
+                ['Total de Turnos', $cifra($r['total_turnos']), null],
+                ['Turnos Atendidos', $cifra($r['turnos_atendidos']), null],
+                ['Turnos Pendientes', $cifra($r['turnos_pendientes']), $r['turnos_en_espera'] . ' en espera · ' . $r['turnos_aplazados'] . ' aplazados'],
+                ['Porcentaje de Atención', number_format($r['porcentaje_atencion'], 1, ',', '.') . ' %', null],
+                ['Llamados sin Cerrar', $cifra($r['turnos_sin_cerrar']), 'Llamados que nadie marcó como atendidos ni aplazados'],
+                ['Turnos Cancelados', $cifra($r['turnos_cancelados']), null],
+                ['Tiempo Promedio de Atención', \App\Services\MetricasTurnos::texto($r['tiempo_promedio_atencion']), $r['atenciones_atipicas'] ? 'Sin ' . $r['atenciones_atipicas'] . ' atenciones de más de 1 hora' : null],
+                ['Tiempo Promedio entre Turnos', \App\Services\MetricasTurnos::texto($r['entre_turnos_promedio']), null],
+                ['Canales No Presenciales', \App\Services\MetricasTurnos::texto($r['tiempo_total_canal']), 'Tiempo total de los asesores en canales no presenciales'],
+            ];
+        @endphp
+        {{-- dompdf no entiende grid ni flex, y con inline-block las tarjetas caían una por fila: tabla de dos columnas --}}
+        <table class="summary-grid">
+            @foreach(array_chunk($tarjetas, 2) as $par)
+            <tr>
+                @foreach($par as [$etiqueta, $valor, $nota])
+                <td>
+                    <div class="summary-item">
+                        <div class="summary-label">{{ $etiqueta }}</div>
+                        <div class="summary-value">{{ $valor }}</div>
+                        @if($nota)<div class="summary-note">{{ $nota }}</div>@endif
+                    </div>
+                </td>
+                @endforeach
+            </tr>
+            @endforeach
+        </table>
+        <div class="notas">
+            @foreach($notas as $nota)
+                <p>{{ $nota }}</p>
+            @endforeach
         </div>
-        
-        @if($estadisticas['resumen']['tiempo_promedio_atencion'])
-            <div class="summary-item" style="margin-top: 10px;">
-                <div class="summary-label">Tiempo Promedio de Atención</div>
-                <div class="summary-value">{{ formatearDuracionSegundos($estadisticas['resumen']['tiempo_promedio_atencion']) }}</div>
-            </div>
-        @endif
     </div>
 
     <!-- Estadísticas por Servicio -->
@@ -254,8 +273,9 @@
                     <th class="text-center">Total</th>
                     <th class="text-center">Atendidos</th>
                     <th class="text-center">Pendientes</th>
+                    <th class="text-center">Sin cerrar</th>
                     <th class="text-center">Cancelados</th>
-                    <th class="text-center">Tiempo Promedio</th>
+                    <th class="text-center">Tiempo promedio de atención</th>
                 </tr>
             </thead>
             <tbody>
@@ -265,10 +285,9 @@
                     <td class="text-center">{{ $datos['total'] }}</td>
                     <td class="text-center">{{ $datos['atendidos'] }}</td>
                     <td class="text-center">{{ $datos['pendientes'] }}</td>
+                    <td class="text-center">{{ $datos['sin_cerrar'] }}</td>
                     <td class="text-center">{{ $datos['cancelados'] }}</td>
-                    <td class="text-center">
-                        {{ formatearDuracionSegundos($datos['tiempo_promedio']) }}
-                    </td>
+                    <td class="text-center">{{ \App\Services\MetricasTurnos::texto($datos['tiempo_promedio']) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -278,25 +297,46 @@
 
     <!-- Estadísticas por Asesor -->
     @if($estadisticas['por_asesor']->count() > 0)
-    <div class="section page-break">
+    <div class="section">
         <div class="section-title">RENDIMIENTO POR ASESOR</div>
-        <table>
+        <table class="tabla-asesores">
             <thead>
                 <tr>
                     <th>Asesor</th>
-                    <th class="text-center">Total Turnos</th>
-                    <th class="text-center">Turnos Atendidos</th>
-                    <th class="text-center">Tiempo Promedio</th>
+                    <th class="text-center">Atendidos</th>
+                    <th class="text-center">Promedio de atención</th>
+                    <th class="text-center">Total de atención</th>
+                    <th class="text-center">Promedio entre turnos</th>
+                    <th class="text-center">Total entre turnos</th>
+                    <th class="text-center">Pausas de más de 1 h</th>
+                    <th class="text-center">Canales no presenciales</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($estadisticas['por_asesor'] as $asesor => $datos)
+                @foreach($estadisticas['por_asesor'] as $asesorId => $datos)
                 <tr>
-                    <td>{{ $asesor }}</td>
-                    <td class="text-center">{{ $datos['total'] }}</td>
+                    <td>{{ $datos['nombre_completo'] }}</td>
                     <td class="text-center">{{ $datos['atendidos'] }}</td>
                     <td class="text-center">
-                        {{ formatearDuracionSegundos($datos['tiempo_promedio_atencion']) }}
+                        {{ \App\Services\MetricasTurnos::texto($datos['tiempo_promedio_atencion']) }}
+                        @if($datos['atipicas'])<div class="summary-note">sin {{ $datos['atipicas'] }} de más de 1 h</div>@endif
+                    </td>
+                    <td class="text-center">{{ \App\Services\MetricasTurnos::texto($datos['tiempo_total_atencion']) }}</td>
+                    <td class="text-center">{{ \App\Services\MetricasTurnos::texto($datos['entre_turnos_promedio']) }}</td>
+                    <td class="text-center">{{ \App\Services\MetricasTurnos::texto($datos['entre_turnos_total']) }}</td>
+                    <td class="text-center">
+                        @if($datos['pausas_largas'])
+                            {{ $datos['pausas_largas'] }} ({{ \App\Services\MetricasTurnos::texto($datos['pausas_largas_total']) }})
+                        @else
+                            0
+                        @endif
+                    </td>
+                    <td class="text-center">
+                        @if($datos['cantidad_actividades_canal'])
+                            {{ $datos['cantidad_actividades_canal'] }} ({{ \App\Services\MetricasTurnos::texto($datos['tiempo_total_canal']) }})
+                        @else
+                            0
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -317,14 +357,14 @@
                     <th>Asesor</th>
                     <th>Estado</th>
                     <th>Prioridad</th>
-                    <th>Fecha Creación</th>
+                    <th>Llegada</th>
                     <th>Duración</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($turnos->take(50) as $turno)
                 <tr>
-                    <td>{{ $turno->codigo }}-{{ $turno->numero }}</td>
+                    <td>{{ $turno->codigo_completo }}</td>
                     <td>{{ $turno->servicio->nombre ?? 'N/A' }}</td>
                     <td>{{ $turno->asesor->nombre_completo ?? ($turno->asesor->nombre_usuario ?? 'N/A') }}</td>
                     <td>
@@ -335,15 +375,17 @@
                     <td class="{{ $turno->prioridad >= 4 ? 'priority-prioritaria' : 'priority-normal' }}">
                         {{ $turno->prioridad >= 4 ? 'Prioritario' : 'Normal' }}
                     </td>
-                    <td>{{ $turno->fecha_creacion ? \Carbon\Carbon::parse($turno->fecha_creacion)->format('d/m/Y H:i') : 'N/A' }}</td>
+                    {{-- created_at es la hora real de llegada: fecha_creacion se reescribe en cada cambio del turno --}}
+                    <td>{{ $turno->created_at ? \Carbon\Carbon::parse($turno->created_at)->format('d/m/Y H:i') : 'N/A' }}</td>
                     <td class="text-center">
-                        {{ formatearDuracionSegundos($turno->duracion_atencion) }}
+                        @php $segundos = $turno->estado === 'atendido' ? \App\Services\MetricasTurnos::duracion($turno) : null; @endphp
+                        {{ \App\Services\MetricasTurnos::texto($segundos) }}{{ \App\Services\MetricasTurnos::esAtipica($segundos) ? ' (abierto)' : '' }}
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
-        
+
         @if($turnos->count() > 50)
         <p style="font-style: italic; color: #666; text-align: center; margin-top: 10px;">
             Mostrando los primeros 50 de {{ $turnos->count() }} turnos totales. 
