@@ -19,7 +19,7 @@ Decisiones abiertas: ninguna. Este lenguaje se llevará después a las vistas in
 
 THESIS: El Login de siempre, depurado hasta lo esencial y hecho ticket: la entrada al turnero tiene la forma del turno que imprime el atril, y dice en qué unidad se está. Rechaza la plantilla con eslogan y adornos (círculos decorativos, botón con degradado que se eleva, píldoras, nombre del hospital en cuatro líneas).
 
-OWN-WORLD: Fondo claro con tinte azul y una luz suave desde arriba; superficies blancas con borde azul grisáceo fino; texto en azul noche; el azul institucional #064b9e solo en la acción principal y en el foco; InterVariable propia; esquinas de 10 px; sombras cortas con desplazamiento y desenfoque suave; ninguna ilustración.
+OWN-WORLD: Fondo claro con tinte azul y una luz suave desde arriba; superficies blancas con borde azul grisáceo fino; texto en azul noche; el azul institucional #064b9e solo en la acción principal y en el foco; InterVariable propia; esquinas de 10 px en campos y botones, y de 18 px en el ticket (la pieza de papel es más blanda que sus controles); el ticket lleva un filo fino que sigue su forma, muescas incluidas; sombras cortas con desplazamiento y desenfoque suave; ninguna ilustración.
 
 STORY: La persona ve el logo y el nombre de su unidad, escribe usuario y contraseña con etiquetas visibles, pulsa Entrar y ve «Entrando…». Si falla, el aviso nombra el problema y la salida (Bloq Mayús, administrador, soporte).
 
