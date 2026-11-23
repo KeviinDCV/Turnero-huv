@@ -245,6 +245,28 @@
         // Configurar CSRF token para peticiones AJAX
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         
+        // Token de la página: si el servidor responde 419 (la sesión venció o se cerró en otra pestaña), se pide uno nuevo
+        // y se reintenta una vez. El 419 se rechaza antes de crear el turno, así que el reintento no duplica nada.
+        let tokenActual = csrfToken;
+        function enviarAlServidor(url, datos, reintentado = false) {
+            return fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': tokenActual },
+                body: JSON.stringify(datos)
+            }).then(response => {
+                if (response.status !== 419) return response.json();
+                if (reintentado) return { success: false, message: 'No se pudo generar el turno. Toque «Volver» e inténtelo de nuevo.' };
+                return fetch('{{ route('turnos.menu') }}', { headers: { 'Accept': 'text/html' }, cache: 'no-store' })
+                    .then(r => r.text())
+                    .then(html => {
+                        const m = html.match(/meta name="csrf-token" content="([^"]+)"/);
+                        if (!m) return { success: false, message: 'No se pudo generar el turno. Toque «Volver» e inténtelo de nuevo.' };
+                        tokenActual = m[1];
+                        return enviarAlServidor(url, datos, true);
+                    });
+            });
+        }
+
         // Variables para almacenar datos del servicio seleccionado
         let servicioSeleccionadoId = null;
         let servicioSeleccionadoNombre = '';
@@ -270,17 +292,7 @@
             if (navigator.vibrate) navigator.vibrate(30);
             mostrarLoading('Generando turno...', nombreServicio);
 
-            fetch('{{ route('turnos.seleccionar') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    servicio_id: servicioId
-                })
-            })
-            .then(response => response.json())
+            enviarAlServidor('{{ route('turnos.seleccionar') }}', { servicio_id: servicioId })
             .then(data => {
                 if (data.success) {
                     // Verificar si requiere priorización
@@ -311,17 +323,7 @@
             if (navigator.vibrate) navigator.vibrate(30);
             mostrarLoading('Generando turno...', nombreSubservicio);
 
-            fetch('{{ route('turnos.seleccionar') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    subservicio_id: subservicioId
-                })
-            })
-            .then(response => response.json())
+            enviarAlServidor('{{ route('turnos.seleccionar') }}', { subservicio_id: subservicioId })
             .then(data => {
                 if (data.success) {
                     // Verificar si requiere priorización
@@ -371,18 +373,7 @@
                 return;
             }
 
-            fetch('{{ route('turnos.crear-con-prioridad') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    servicio_id: servicioSeleccionadoId,
-                    prioridad: prioridad
-                })
-            })
-            .then(response => response.json())
+            enviarAlServidor('{{ route('turnos.crear-con-prioridad') }}', { servicio_id: servicioSeleccionadoId, prioridad: prioridad })
             .then(data => {
                 cerrarPrioridadModal();
                 
